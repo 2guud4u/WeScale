@@ -3,10 +3,11 @@
 
 ## On how to run:
 
-Run Flask app server as 
+Run node app server as 
 
+in /nodeServer/
 ```
-    python rl_agent/app.py
+    node server.js
 ```
 
 To run the game local use run:
