@@ -32,15 +32,44 @@ function getGameState() {
 }
 
 function sendGameState() {
+    const state = getGameState();
+    console.log("Attempting to send state:", state);  // Log the state being sent
+    
     fetch("http://localhost:5000/state", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(getGameState())
-    }).catch(err => console.error("Error sending game state:", err));
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        mode: "cors",
+        body: JSON.stringify(state)
+    })
+    .then(response => {
+        console.log("Response received:", response.status);  // Log the response status
+        return response.json();
+    })
+    .then(data => console.log("Server response:", data))
+    .catch(err => console.error("Error sending game state:", err));
 }
 
+
+// function sendGameState() {
+//     fetch("http://localhost:5000/state", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "Accept": "application/json"
+//         },
+//         mode: "cors",  // Explicitly set CORS mode
+//         body: JSON.stringify(getGameState())
+//     })
+//     .then(response => response.json())
+//     .then(data => console.log("State sent successfully:", data))
+//     .catch(err => console.error("Error sending game state:", err));
+// }
+
 // Send game state every 100ms
-setInterval(sendGameState, 100);
+setInterval(sendGameState, 50);
 
 names = ["Ahmed Steinke",
     "Aubrey Brass",
