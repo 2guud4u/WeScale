@@ -19,28 +19,81 @@ XX = 0, YY = 0;
 
 let lastLoopTime = window.performance.now();
 
+// function getGameState() {
+//     let snake = mySnake[0];  // Player-controlled snake
+//     let state = {
+//         snake_x: snake.v[0].x,
+//         snake_y: snake.v[0].y,
+//         snake_length: snake.v.length,
+//         food: FOOD.map(f => ({ x: f.x, y: f.y })),  // Array of food positions
+//         is_dead: die
+//     };
+//     return state;
+// }
+
 function getGameState() {
+    console.log("Getting game state...");  // Add this line
     let snake = mySnake[0];  // Player-controlled snake
+    
+    // Check if snake exists
+    if (!snake) {
+        console.error("Snake not found!");
+        return null;
+    }
+    
+    console.log("Snake object:", snake);  // Add this line
+    
     let state = {
         snake_x: snake.v[0].x,
         snake_y: snake.v[0].y,
         snake_length: snake.v.length,
-        food: FOOD.map(f => ({ x: f.x, y: f.y })),  // Array of food positions
+        food: FOOD.map(f => ({ x: f.x, y: f.y })),
         is_dead: die
     };
+    
+    console.log("Generated state:", state);  // Add this line
     return state;
 }
 
 function sendGameState() {
+    const state = getGameState();
+    console.log("Attempting to send state:", state);  // Log the state being sent
+    
     fetch("http://localhost:5000/state", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(getGameState())
-    }).catch(err => console.error("Error sending game state:", err));
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        mode: "cors",
+        body: JSON.stringify(state)
+    })
+    .then(response => {
+        console.log("Response received:", response.status);  // Log the response status
+        return response.json();
+    })
+    .then(data => console.log("Server response:", data))
+    .catch(err => console.error("Error sending game state:", err));
 }
 
-// Send game state every 100ms
-setInterval(sendGameState, 100);
+
+// function sendGameState() {
+//     fetch("http://localhost:5000/state", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "Accept": "application/json"
+//         },
+//         mode: "cors",  // Explicitly set CORS mode
+//         body: JSON.stringify(getGameState())
+//     })
+//     .then(response => response.json())
+//     .then(data => console.log("State sent successfully:", data))
+//     .catch(err => console.error("Error sending game state:", err));
+// }
+
+// // Send game state every 100ms
+// setInterval(sendGameState, 50);
 
 names = ["Ahmed Steinke",
     "Aubrey Brass",
@@ -427,5 +480,14 @@ class game {
         return true;
     }
 }
+
+
+// At the bottom of your JS file
+console.log("Game script loaded");  // This should show up when the page loads
+
+setInterval(() => {
+    console.log("Interval tick");  // This should appear every 100ms
+    sendGameState();
+}, 100);
 
 var g = new game();
