@@ -19,15 +19,39 @@ XX = 0, YY = 0;
 
 let lastLoopTime = window.performance.now();
 
+// function getGameState() {
+//     let snake = mySnake[0];  // Player-controlled snake
+//     let state = {
+//         snake_x: snake.v[0].x,
+//         snake_y: snake.v[0].y,
+//         snake_length: snake.v.length,
+//         food: FOOD.map(f => ({ x: f.x, y: f.y })),  // Array of food positions
+//         is_dead: die
+//     };
+//     return state;
+// }
+
 function getGameState() {
+    console.log("Getting game state...");  // Add this line
     let snake = mySnake[0];  // Player-controlled snake
+    
+    // Check if snake exists
+    if (!snake) {
+        console.error("Snake not found!");
+        return null;
+    }
+    
+    console.log("Snake object:", snake);  // Add this line
+    
     let state = {
         snake_x: snake.v[0].x,
         snake_y: snake.v[0].y,
         snake_length: snake.v.length,
-        food: FOOD.map(f => ({ x: f.x, y: f.y })),  // Array of food positions
+        food: FOOD.map(f => ({ x: f.x, y: f.y })),
         is_dead: die
     };
+    
+    console.log("Generated state:", state);  // Add this line
     return state;
 }
 
@@ -68,8 +92,8 @@ function sendGameState() {
 //     .catch(err => console.error("Error sending game state:", err));
 // }
 
-// Send game state every 100ms
-setInterval(sendGameState, 50);
+// // Send game state every 100ms
+// setInterval(sendGameState, 50);
 
 names = ["Ahmed Steinke",
     "Aubrey Brass",
@@ -456,5 +480,14 @@ class game {
         return true;
     }
 }
+
+
+// At the bottom of your JS file
+console.log("Game script loaded");  // This should show up when the page loads
+
+setInterval(() => {
+    console.log("Interval tick");  // This should appear every 100ms
+    sendGameState();
+}, 100);
 
 var g = new game();
