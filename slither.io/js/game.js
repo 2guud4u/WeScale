@@ -19,6 +19,29 @@ XX = 0, YY = 0;
 
 let lastLoopTime = window.performance.now();
 
+function getGameState() {
+    let snake = mySnake[0];  // Player-controlled snake
+    let state = {
+        snake_x: snake.v[0].x,
+        snake_y: snake.v[0].y,
+        snake_length: snake.v.length,
+        food: FOOD.map(f => ({ x: f.x, y: f.y })),  // Array of food positions
+        is_dead: die
+    };
+    return state;
+}
+
+function sendGameState() {
+    fetch("http://localhost:5000/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(getGameState())
+    }).catch(err => console.error("Error sending game state:", err));
+}
+
+// Send game state every 100ms
+setInterval(sendGameState, 100);
+
 names = ["Ahmed Steinke",
     "Aubrey Brass",
     "Johanne Boothe",
@@ -155,7 +178,7 @@ class game {
         if (die) return;
     
         let now = window.performance.now();
-        console.log(`Time since last loop: ${now - lastLoopTime} ms`);
+        // console.log(`Time since last loop: ${now - lastLoopTime} ms`);
         lastLoopTime = now;
     
         this.update();
