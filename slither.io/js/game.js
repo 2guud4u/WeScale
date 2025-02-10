@@ -237,12 +237,25 @@ class game {
                             if (index >= FOOD.length)
                                 index = 0;
                         }
-                        if (i != 0)
-                            mySnake[i] = new snake(names[Math.floor(Math.random() * 99999) % names.length], this, Math.max(Math.floor((mySnake[0].score > 10 * minScore) ? mySnake[0].score / 10 : minScore), mySnake[i].score / 10), this.randomXY(XX), this.randomXY(YY));
-                        else {
-                            window.alert("Your Score: " + Math.floor(mySnake[i].score));
-                            die = true;
-                            window.location.href = ".";
+                        // if (i != 0)
+                        //     mySnake[i] = new snake(names[Math.floor(Math.random() * 99999) % names.length], this, Math.max(Math.floor((mySnake[0].score > 10 * minScore) ? mySnake[0].score / 10 : minScore), mySnake[i].score / 10), this.randomXY(XX), this.randomXY(YY));
+                        // else {
+                        //     window.alert("Your Score: " + Math.floor(mySnake[i].score));
+                        //     die = true;
+                        //     window.location.href = ".";
+                        // }
+
+                        if (i != 0) {
+                            mySnake[i] = new snake(
+                                names[Math.floor(Math.random() * 99999) % names.length], 
+                                this, 
+                                Math.max(Math.floor((mySnake[0].score > 10 * minScore) ? mySnake[0].score / 10 : minScore), mySnake[i].score / 10), 
+                                this.randomXY(XX), 
+                                this.randomXY(YY)
+                            );
+                        } else {
+                            console.log("Game Over! Restarting...");
+                            this.restartGame();
                         }
                     }
                 }
@@ -273,6 +286,37 @@ class game {
         for (let i = 0; i < mySnake.length; i++)
             mySnake[i].draw();
         this.drawScore();
+    }
+
+    restartGame() {
+        die = false;
+        mySnake = [];
+        FOOD = [];
+        XX = 0;
+        YY = 0;
+        chX = chY = 1;
+    
+        // Reinitialize player snake
+        mySnake[0] = new snake("HaiZuka", this, minScore, game_W / 2, game_H / 2);
+    
+        // Reinitialize AI snakes
+        for (let i = 1; i < Nsnake; i++) {
+            mySnake[i] = new snake(
+                names[Math.floor(Math.random() * 99999) % names.length], 
+                this, 
+                Math.floor(2 * minScore + Math.random() * 2 * minScore), 
+                (Math.random() - Math.random()) * sizeMap, 
+                (Math.random() - Math.random()) * sizeMap
+            );
+        }
+    
+        // Reinitialize food
+        for (let i = 0; i < NFood; i++) {
+            FOOD[i] = new food(this, this.getSize() / (7 + Math.random() * 10), (Math.random() - Math.random()) * sizeMap, (Math.random() - Math.random()) * sizeMap);
+        }
+    
+        // Restart the game loop
+        this.loop();
     }
 
     drawScore() {
