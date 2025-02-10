@@ -17,6 +17,8 @@ die = false;
 Xfocus = Yfocus = 0;
 XX = 0, YY = 0;
 
+let lastLoopTime = window.performance.now();
+
 names = ["Ahmed Steinke",
     "Aubrey Brass",
     "Johanne Boothe",
@@ -83,6 +85,7 @@ class game {
     constructor() {
         this.canvas = null;
         this.context = null;
+        this.loopID;
         this.init();
     }
 
@@ -149,11 +152,21 @@ class game {
     }
 
     loop() {
-        if (die)
-            return;
+        if (die) return;
+    
+        let now = window.performance.now();
+        console.log(`Time since last loop: ${now - lastLoopTime} ms`);
+        lastLoopTime = now;
+    
         this.update();
+        // this.update();
+        // this.update();
         this.draw();
-        setTimeout(() => this.loop(), 30);
+        
+        if (this.loopID) {
+            clearTimeout(this.loopID);
+        }
+        this.loopID = setTimeout(() => this.loop(), 30);
     }
 
     update() {
@@ -296,9 +309,14 @@ class game {
         YY = 0;
         chX = chY = 1;
     
+        // Reset speed variables
+        SPEED = 1;   // Reset speed to default
+        MaxSpeed = this.getSize() / 7; // Restore max speed
+
         // Reinitialize player snake
         mySnake[0] = new snake("HaiZuka", this, minScore, game_W / 2, game_H / 2);
-    
+        mySnake[0].speed = 1;  // Explicitly reset player snake's speed
+
         // Reinitialize AI snakes
         for (let i = 1; i < Nsnake; i++) {
             mySnake[i] = new snake(
@@ -308,6 +326,7 @@ class game {
                 (Math.random() - Math.random()) * sizeMap, 
                 (Math.random() - Math.random()) * sizeMap
             );
+            mySnake[i].speed = 1;  // Reset AI snake speeds
         }
     
         // Reinitialize food
