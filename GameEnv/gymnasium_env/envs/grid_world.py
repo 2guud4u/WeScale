@@ -5,12 +5,25 @@ import pygame
 import numpy as np
 
 
+rewards = {
+    "die": -100,
+    "food": 1,
+    "kill": 50,
+    "growth": 5,
+    "survives": 0.1,
+    "towards-food": 0.05,
+    "away-food": -0.05
+}
+
 class Actions(Enum):
     right = 0
-    up = 1
-    left = 2
-    down = 3
-
+    up_right = 1
+    up = 2
+    up_left = 3
+    left = 4
+    down_left = 5
+    down = 6
+    down_right = 7
 
 class GridWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -29,8 +42,8 @@ class GridWorldEnv(gym.Env):
             }
         )
 
-        # We have 4 actions, corresponding to "right", "up", "left", "down", "right"
-        self.action_space = spaces.Discrete(4)
+        # We have 8 actions, corresponding to "right", "up", "left", "down", "up-right", "up-left", "down-right", "down-left"
+        self.action_space = spaces.Discrete(8)
 
         """
         The following dictionary maps abstract actions from `self.action_space` to 
@@ -39,9 +52,13 @@ class GridWorldEnv(gym.Env):
         """
         self._action_to_direction = {
             Actions.right.value: np.array([1, 0]),
+            Actions.up_right.value: np.array([1, 1]),
             Actions.up.value: np.array([0, 1]),
+            Actions.up_left.value: np.array([-1, 1]),
             Actions.left.value: np.array([-1, 0]),
+            Actions.down_left.value: np.array([-1, -1]),
             Actions.down.value: np.array([0, -1]),
+            Actions.down_right.value: np.array([1, -1]),
         }
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -99,7 +116,23 @@ class GridWorldEnv(gym.Env):
         )
         # An episode is done iff the agent has reached the target
         terminated = np.array_equal(self._agent_location, self._target_location)
-        reward = 1 if terminated else 0  # Binary sparse rewards
+        #reward = 1 if terminated else 0  # Binary sparse rewards
+        reward = 0
+        if self.ate_food():
+            reward += rewards["food"]
+        if self.grew():
+            reward += rewards["growth"]
+        if self.kill():
+            reward += rewards["kill"]
+        if self.move_away():
+            reward += rewards["away-food"]
+        if self.move_towards():
+            reward += rewards["towards-food"]
+        if self.died():
+            reward += rewards["die"]
+        else:
+            reward += rewards["survives"]
+        
         observation = self._get_obs()
         info = self._get_info()
 
