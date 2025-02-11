@@ -162,6 +162,9 @@ class game {
         this.listenTouch();
     }
 
+    getState(){
+        return this.mySnake
+    }
     listenTouch() {
         // document.addEventListener("touchmove", evt => {
         //     var y = evt.touches[0].pageY;
