@@ -40,7 +40,7 @@ app.get("/step", (req, res) => {
     //do step stuff
     //handle game stuff
     let gameState = g.getState()
-    
+    console.log(gameState)
     res.send("")
 
 });
