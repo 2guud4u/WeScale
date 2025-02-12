@@ -53,6 +53,7 @@ app.get("/reset", (req, res) => {
         index,
         minScore,
         die,
+        1
     );
     //handle game stuff
     res.send("Game after reset");

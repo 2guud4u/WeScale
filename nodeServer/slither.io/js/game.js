@@ -64,6 +64,18 @@ let names = [
     "Laurence Hanning",
     "NamZ Bede",
 ];
+class DeterministicRandom {
+    constructor(seed) {
+      this.seed = seed % 2147483647; // Ensure seed is within range
+      if (this.seed <= 0) this.seed += 2147483646;
+    }
+  
+    next() {
+      this.seed = this.seed * 16807 % 2147483647;
+      return (this.seed - 1) / 2147483646;
+    }
+  }
+
 
 class game {
     constructor(
@@ -103,32 +115,34 @@ class game {
         this.chY = 0;
         this.chX = 0;
         this.bg_im = null;
+        this.random = new DeterministicRandom(seed)
         loadImage("public/images/Map2.png")
             .then((img) => {
                 this.bg_im = img;
                 //console.log("Image loaded in Node.js!");
             })
             .catch((err) => console.error("Image loading error:", err));
-        this.init(seed);
+        this.init();
+
     }
 
-    init(seed) {
+    init() {
         // this.canvas = document.createElement("canvas");
         // this.context = this.canvas.getContext("2d");
         // document.body.appendChild(this.canvas);
         // this.canvas = createCanvas(800, 600)
         // this.context = this.canvas.getContext("2d");
         // this.render();
-
+        console.log("random",this.random)
         for (let i = 0; i < this.Nsnake; i++)
             this.mySnake[i] = new snake(
-                names[Math.floor(Math.random() * 99999) % names.length],
+                names[Math.floor(this.random.next() * 99999) % names.length],
                 this,
                 Math.floor(
-                    2 * this.minScore + Math.random() * 2 * this.minScore,
+                    2 * this.minScore + this.random.next() * 2 * this.minScore,
                 ),
-                (Math.random() - Math.random()) * this.sizeMap,
-                (Math.random() - Math.random()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
             );
 
         this.mySnake[0] = new snake(
@@ -141,9 +155,9 @@ class game {
         for (let i = 0; i < this.NFood; i++) {
             let newFood = new Food(
                 this,
-                this.getSize() / (7 + Math.random() * 10),
-                (Math.random() - Math.random()) * this.sizeMap,
-                (Math.random() - Math.random()) * this.sizeMap,
+                this.getSize() / (7 + this.random.next() * 10),
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
             );
             this.Food[i] = newFood;
         }
@@ -214,8 +228,8 @@ class game {
     }
 
     update(inputX, inputY) {
-        chX = (inputX - this.game_W / 2) / 15;
-        chY = (inputY - this.game_H / 2) / 15;
+        let chX = (inputX - this.game_W / 2) / 15;
+        let chY = (inputY - this.game_H / 2) / 15;
         // this.render();
         this.unFood();
         this.changeFood();
@@ -276,10 +290,10 @@ class game {
             ) {
                 this.Food[i] = new Food(
                     this,
-                    this.getSize() / (10 + Math.random() * 10),
-                    (Math.random() - Math.random()) * this.sizeMap +
+                    this.getSize() / (10 + this.random.next() * 10),
+                    (this.random.next() - this.random.next()) * this.sizeMap +
                         this.mySnake[0].v[0].x,
-                    (Math.random() - Math.random()) * this.sizeMap +
+                    (this.random.next() - this.random.next()) * this.sizeMap +
                         this.mySnake[0].v[0].y,
                 );
                 // console.log(FOOD[i]);
@@ -317,9 +331,9 @@ class game {
                     this.mySnake[i].score += Math.floor(this.Food[j].value);
                     this.Food[j] = new Food(
                         this,
-                        this.getSize() / (5 + Math.random() * 10),
-                        (Math.random() - Math.random()) * 5000 + this.XX,
-                        (Math.random() - Math.random()) * 5000 + this.YY,
+                        this.getSize() / (5 + this.random.next() * 10),
+                        (this.random.next() - this.random.next()) * 5000 + this.XX,
+                        (this.random.next() - this.random.next()) * 5000 + this.YY,
                     );
                 }
             }
@@ -344,11 +358,11 @@ class game {
                         for (let k = 0; k < this.mySnake[i].v.length; k += 5) {
                             this.Food[index] = new Food(
                                 this,
-                                this.getSize() / (2 + Math.random() * 2),
+                                this.getSize() / (2 + this.random.next() * 2),
                                 this.mySnake[i].v[k].x +
-                                    (Math.random() * this.mySnake[i].size) / 2,
+                                    (this.random.next() * this.mySnake[i].size) / 2,
                                 this.mySnake[i].v[k].y +
-                                    (Math.random() * this.mySnake[i].size) / 2,
+                                    (this.random.next() * this.mySnake[i].size) / 2,
                             );
                             this.Food[index++].value =
                                 (0.4 * this.mySnake[i].score) /
@@ -359,7 +373,7 @@ class game {
                         if (i != 0) {
                             this.mySnake[i] = new snake(
                                 names[
-                                    Math.floor(Math.random() * 99999) %
+                                    Math.floor(this.random.next() * 99999) %
                                         names.length
                                 ],
                                 this,
@@ -435,13 +449,13 @@ class game {
         // Reinitialize AI snakes
         for (let i = 1; i < Nsnake; i++) {
             this.mySnake[i] = new snake(
-                names[Math.floor(Math.random() * 99999) % names.length],
+                names[Math.floor(this.random.next() * 99999) % names.length],
                 this,
                 Math.floor(
-                    2 * this.minScore + Math.random() * 2 * this.minScore,
+                    2 * this.minScore + this.random.next() * 2 * this.minScore,
                 ),
-                (Math.random() - Math.random()) * this.sizeMap,
-                (Math.random() - Math.random()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
             );
             this.mySnake[i].speed = 1; // Reset AI snake speeds
         }
@@ -450,9 +464,9 @@ class game {
         for (let i = 0; i < this.NFood; i++) {
             this.Food[i] = new Food(
                 this,
-                this.getSize() / (7 + Math.random() * 10),
-                (Math.random() - Math.random()) * this.sizeMap,
-                (Math.random() - Math.random()) * this.sizeMap,
+                this.getSize() / (7 + this.random.next() * 10),
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
             );
         }
 
@@ -509,7 +523,7 @@ class game {
     randomXY(n) {
         let ans = 0;
         while (Math.abs(ans) < 1) {
-            ans = 3 * Math.random() - 3 * Math.random();
+            ans = 3 * this.random.next() - 3 * this.random.next();
         }
         return ans * this.sizeMap + n;
     }
