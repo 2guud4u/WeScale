@@ -1,25 +1,25 @@
 body {
-  background-size: cover;
+    background-size: cover;
 }
 
 body {
-  background-color: white;
-  margin: 0px;
-  text-align: center;
+    background-color: white;
+    margin: 0px;
+    text-align: center;
 }
 
 html,
 body {
-  margin: 0;
-  height: 100%;
-  overflow: hidden;
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
 }
 
 html {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 html {
-  overflow-y: hidden;
+    overflow-y: hidden;
 }

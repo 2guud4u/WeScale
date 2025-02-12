@@ -20,9 +20,9 @@ Or download and open the `index.html` file in a web browser.
 ## Updates
 
 - **v1.0.0**:
-  - Initial release of the basic version of the Slither game
-  - Added movement, food consumption, score increment, length increment, speed boost functionalities
-  - Added gameplay instructions
+    - Initial release of the basic version of the Slither game
+    - Added movement, food consumption, score increment, length increment, speed boost functionalities
+    - Added gameplay instructions
 
 ## Author
 
