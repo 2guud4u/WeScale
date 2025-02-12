@@ -39,10 +39,15 @@ app.get("/", (req, res) => {
 app.get("/step", (req, res) => {
     //do step stuff
     //handle game stuff
-    let gameState = g.getState()
-    console.log(gameState)
-    res.send("")
-
+    let gameState = g.getState(); //assuming this returns game state
+    console.log(gameState);
+    
+    res.json({
+        snake: gameState.snake,  //adjust based on actual data
+        food: gameState.food,
+        score: gameState.score,
+        alive: gameState.alive
+    });
 });
 
 app.get("/reset", (req, res) => {
@@ -54,7 +59,12 @@ app.get("/reset", (req, res) => {
 app.get("/state", (req, res) => {
     //do step stuff
     //handle game stuff
-    res.send("Game stuff")
+    let gameState = g.getState();
+    if (!gameState) {
+        res.status(500).json({ error: "Failed to get game state" });
+    } else {
+        res.send(gameState);
+    }
 });
 
 

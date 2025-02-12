@@ -34,6 +34,18 @@ class snake {
         }).catch(err => console.error("Image loading error:", err));
     }
 
+    toJSON() {
+        return {
+            snake_x: this.v[0].x,
+            snake_y: this.v[0].y,
+            snake_length: this.v.length,
+            score: this.score,
+            size: this.size,
+            speed: this.speed,
+            angle: this.angle,
+        };
+    }
+
     update() {
         this.time--;
         this.angle = this.getAngle(this.dx, this.dy);

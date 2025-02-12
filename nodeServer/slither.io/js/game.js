@@ -15,11 +15,11 @@ function getGameState() {
     console.log("Snake object:", snake);  // Add this line
     
     let state = {
-        snake_x: snake.v[0].x,
-        snake_y: snake.v[0].y,
-        snake_length: snake.v.length,
+        snake: snake.toJSON(),
         food: FOOD.map(f => ({ x: f.x, y: f.y })),
-        is_dead: die
+        is_dead: die,
+        score: snake.score,
+        size: snake.size,
     };
     
     console.log("Generated state:", state);  // Add this line
