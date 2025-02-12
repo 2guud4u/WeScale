@@ -79,6 +79,7 @@ class game {
     index,
     minScore,
     die,
+    seed
   ) {
     this.game_W = game_W;
     this.game_H = game_H;
@@ -108,10 +109,10 @@ class game {
         //console.log("Image loaded in Node.js!");
       })
       .catch((err) => console.error("Image loading error:", err));
-    this.init();
+    this.init(seed);
   }
 
-  init() {
+  init(seed) {
     // this.canvas = document.createElement("canvas");
     // this.context = this.canvas.getContext("2d");
     // document.body.appendChild(this.canvas);
@@ -127,10 +128,11 @@ class game {
         (Math.random() - Math.random()) * this.sizeMap,
         (Math.random() - Math.random()) * this.sizeMap,
       );
+
     this.mySnake[0] = new snake(
       "HaiZuka",
       this,
-      this.minScore,
+      0,
       this.game_W / 2,
       this.game_H / 2,
     );
