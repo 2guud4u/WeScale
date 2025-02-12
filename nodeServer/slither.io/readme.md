@@ -5,6 +5,7 @@
 The Basic Slither Game is written in JavaScript and utilizes HTML5 canvas for graphics rendering. This game is inspired by classic games such as Slither.io, Snake, ... and optimized to run on all devices.
 
 ## How to Play
+
 - Use arrow keys to move the snake
 - Eat food to increase points and snake's length
 - Avoid collisions with other snakes' bodies.
@@ -19,9 +20,9 @@ Or download and open the `index.html` file in a web browser.
 ## Updates
 
 - **v1.0.0**:
-  - Initial release of the basic version of the Slither game
-  - Added movement, food consumption, score increment, length increment, speed boost functionalities
-  - Added gameplay instructions
+    - Initial release of the basic version of the Slither game
+    - Added movement, food consumption, score increment, length increment, speed boost functionalities
+    - Added gameplay instructions
 
 ## Author
 

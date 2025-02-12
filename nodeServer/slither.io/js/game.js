@@ -15,7 +15,7 @@ function getGameState() {
     console.log("Snake object:", snake);  // Add this line
     
     let state = {
-        snake: snake.toJSON(),
+        ssnake: snake.toJSON(),
         food: FOOD.map(f => ({ x: f.x, y: f.y })),
         is_dead: die,
         score: snake.score,
@@ -105,14 +105,39 @@ let names = ["Ahmed Steinke",
     "Isabella Mosier",
     "Lon Lassiter",
     "Laurence Hanning",
-    "NamZ Bede"
+    "NamZ Bede",
 ];
+class DeterministicRandom {
+    constructor(seed) {
+      this.seed = seed % 2147483647; // Ensure seed is within range
+      if (this.seed <= 0) this.seed += 2147483646;
+    }
+  
+    next() {
+      this.seed = this.seed * 16807 % 2147483647;
+      return (this.seed - 1) / 2147483646;
+    }
+  }
+
 
 class game {
-    constructor(game_W, game_H, speed, MaxSpeed, mySnake, FOOD, NFood, 
-        Nsnake, sizeMap, index, minScore, die) {
+    constructor(
+        game_W,
+        game_H,
+        speed,
+        MaxSpeed,
+        mySnake,
+        FOOD,
+        NFood,
+        Nsnake,
+        sizeMap,
+        index,
+        minScore,
+        die,
+        seed,
+    ) {
         this.game_W = game_W;
-        this.game_H = game_H
+        this.game_H = game_H;
         this.canvas = null;
         this.context = null;
         this.loopID;
@@ -133,27 +158,51 @@ class game {
         this.chY = 0;
         this.chX = 0;
         this.bg_im = null;
-        loadImage("public/images/Map2.png").then((img) => {
-            this.bg_im = img;
-            //console.log("Image loaded in Node.js!");
-        }).catch(err => console.error("Image loading error:", err));
+        this.random = new DeterministicRandom(seed)
+        loadImage("public/images/Map2.png")
+            .then((img) => {
+                this.bg_im = img;
+                //console.log("Image loaded in Node.js!");
+            })
+            .catch((err) => console.error("Image loading error:", err));
         this.init();
+
     }
 
     init() {
         // this.canvas = document.createElement("canvas");
         // this.context = this.canvas.getContext("2d");
         // document.body.appendChild(this.canvas);
-        this.canvas = createCanvas(800, 600)
-        this.context = this.canvas.getContext("2d");
+        // this.canvas = createCanvas(800, 600)
+        // this.context = this.canvas.getContext("2d");
         // this.render();
-
+        console.log("random",this.random)
         for (let i = 0; i < this.Nsnake; i++)
-            this.mySnake[i] = new snake(names[Math.floor(Math.random() * 99999) % names.length], this, Math.floor(2 * this.minScore + Math.random() * 2 * this.minScore), (Math.random() - Math.random()) * this.sizeMap, (Math.random() - Math.random()) * this.sizeMap);
-        this.mySnake[0] = new snake("HaiZuka", this, this.minScore, this.game_W / 2, this.game_H / 2);
+            this.mySnake[i] = new snake(
+                names[Math.floor(this.random.next() * 99999) % names.length],
+                this,
+                Math.floor(
+                    2 * this.minScore + this.random.next() * 2 * this.minScore,
+                ),
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
+            );
+
+        this.mySnake[0] = new snake(
+            "HaiZuka",
+            this,
+            0,
+            this.game_W / 2,
+            this.game_H / 2,
+        );
         for (let i = 0; i < this.NFood; i++) {
-            let newFood = new Food(this, this.getSize() / (7 + Math.random() * 10), (Math.random() - Math.random()) * this.sizeMap, (Math.random() - Math.random()) * this.sizeMap);
-            this.Food[i] = newFood
+            let newFood = new Food(
+                this,
+                this.getSize() / (7 + this.random.next() * 10),
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
+            );
+            this.Food[i] = newFood;
         }
 
         this.loop();
@@ -162,8 +211,8 @@ class game {
         this.listenTouch();
     }
 
-    getState(){
-        return this.mySnake
+    getState() {
+        return this.mySnake;
     }
     listenTouch() {
         // document.addEventListener("touchmove", evt => {
@@ -172,7 +221,6 @@ class game {
         //     this.chX = (x - this.game_W / 2) / 15;
         //     this.chY = (y - this.game_H / 2) / 15;
         // })
-
         // document.addEventListener("touchstart", evt => {
         //     var y = evt.touches[0].pageY;
         //     var x = evt.touches[0].pageX;
@@ -180,7 +228,6 @@ class game {
         //     this.chY = (y - this.game_H / 2) / 15;
         //     this.mySnake[0].speed = 2;
         // })
-
         // document.addEventListener("touchend", evt => {
         //     this.mySnake[0].speed = 1;
         // })
@@ -192,14 +239,12 @@ class game {
         //     var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
         //     this.mySnake[0].speed = 2;
         // })
-
         // document.addEventListener("mousemove", evt => {
         //     var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
         //     var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
         //     this.chX = (x - this.game_W / 2) / 15;
         //     this.chY = (y - this.game_H / 2) / 15;
         // })
-
         // document.addEventListener("mouseup", evt => {
         //     var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
         //     var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
@@ -209,23 +254,25 @@ class game {
 
     loop() {
         if (this.die) return;
-    
+
         // let now = window.performance.now();
         // // console.log(`Time since last loop: ${now - lastLoopTime} ms`);
         // lastLoopTime = now;
-    
+
         this.update();
         // this.update();
         // this.update();
         // this.draw();
-        
+
         if (this.loopID) {
             clearTimeout(this.loopID);
         }
         this.loopID = setTimeout(() => this.loop(), 30);
     }
 
-    update() {
+    update(inputX, inputY) {
+        let chX = (inputX - this.game_W / 2) / 15;
+        let chY = (inputY - this.game_H / 2) / 15;
         // this.render();
         this.unFood();
         this.changeFood();
@@ -233,20 +280,31 @@ class game {
         this.updateChXY();
         this.checkDie();
 
-        this.mySnake[0].dx = this.chX;
-        this.mySnake[0].dy = this.chY;
-        this.XX += this.chX * this.mySnake[0].speed;
-        this.YY += this.chY * this.mySnake[0].speed;
+        this.mySnake[0].dx = chX;
+        this.mySnake[0].dy = chY;
+        this.XX += chX * this.mySnake[0].speed;
+        this.YY += chY * this.mySnake[0].speed;
         this.mySnake[0].v[0].x = this.XX + this.game_W / 2;
         this.mySnake[0].v[0].y = this.YY + this.game_H / 2;
+        //return game state
     }
 
     updateChXY() {
-        while (Math.abs(this.chY) * Math.abs(this.chY) + Math.abs(this.chX) * Math.abs(this.chX) > this.MaxSpeed * this.MaxSpeed && this.chY * this.chX != 0) {
+        while (
+            Math.abs(this.chY) * Math.abs(this.chY) +
+                Math.abs(this.chX) * Math.abs(this.chX) >
+                this.MaxSpeed * this.MaxSpeed &&
+            this.chY * this.chX != 0
+        ) {
             this.chX /= 1.1;
             this.chY /= 1.1;
         }
-        while (Math.abs(this.chY) * Math.abs(this.chY) + Math.abs(this.chX) * Math.abs(this.chX) < this.MaxSpeed * this.MaxSpeed && this.chY * this.chX != 0) {
+        while (
+            Math.abs(this.chY) * Math.abs(this.chY) +
+                Math.abs(this.chX) * Math.abs(this.chX) <
+                this.MaxSpeed * this.MaxSpeed &&
+            this.chY * this.chX != 0
+        ) {
             this.chX *= 1.1;
             this.chY *= 1.1;
         }
@@ -265,28 +323,61 @@ class game {
 
     changeFood() {
         for (let i = 0; i < this.Food.length; i++)
-            if (Math.sqrt((this.mySnake[0].v[0].x - this.Food[i].x) * (this.mySnake[0].v[0].x - this.Food[i].x) + (this.mySnake[0].v[0].y - this.Food[i].y) * (this.mySnake[0].v[0].y - this.Food[i].y)) > this.sizeMap) {
-                this.Food[i] = new Food(this, this.getSize() / (10 + Math.random() * 10), (Math.random() - Math.random()) * this.sizeMap + this.mySnake[0].v[0].x, (Math.random() - Math.random()) * this.sizeMap + this.mySnake[0].v[0].y);
+            if (
+                Math.sqrt(
+                    (this.mySnake[0].v[0].x - this.Food[i].x) *
+                        (this.mySnake[0].v[0].x - this.Food[i].x) +
+                        (this.mySnake[0].v[0].y - this.Food[i].y) *
+                            (this.mySnake[0].v[0].y - this.Food[i].y),
+                ) > this.sizeMap
+            ) {
+                this.Food[i] = new Food(
+                    this,
+                    this.getSize() / (10 + this.random.next() * 10),
+                    (this.random.next() - this.random.next()) * this.sizeMap +
+                        this.mySnake[0].v[0].x,
+                    (this.random.next() - this.random.next()) * this.sizeMap +
+                        this.mySnake[0].v[0].y,
+                );
                 // console.log(FOOD[i]);
             }
     }
 
     changeSnake() {
         for (let i = 0; i < this.mySnake.length; i++)
-            if (Math.sqrt((this.mySnake[0].v[0].x - this.mySnake[i].v[0].x) * (this.mySnake[0].v[0].x - this.mySnake[i].v[0].x) + (this.mySnake[0].v[0].y - this.mySnake[i].v[0].y) * (this.mySnake[0].v[0].y - this.mySnake[i].v[0].y)) > this.sizeMap) {
-                this.mySnake[i].v[0].x = (this.mySnake[0].v[0].x + this.mySnake[i].v[0].x) / 2;
-                this.mySnake[i].v[0].y = (this.mySnake[0].v[0].y + this.mySnake[i].v[0].y) / 2;
+            if (
+                Math.sqrt(
+                    (this.mySnake[0].v[0].x - this.mySnake[i].v[0].x) *
+                        (this.mySnake[0].v[0].x - this.mySnake[i].v[0].x) +
+                        (this.mySnake[0].v[0].y - this.mySnake[i].v[0].y) *
+                            (this.mySnake[0].v[0].y - this.mySnake[i].v[0].y),
+                ) > this.sizeMap
+            ) {
+                this.mySnake[i].v[0].x =
+                    (this.mySnake[0].v[0].x + this.mySnake[i].v[0].x) / 2;
+                this.mySnake[i].v[0].y =
+                    (this.mySnake[0].v[0].y + this.mySnake[i].v[0].y) / 2;
             }
     }
 
     unFood() {
-        if (this.mySnake.length <= 0)
-            return;
+        if (this.mySnake.length <= 0) return;
         for (let i = 0; i < this.mySnake.length; i++)
             for (let j = 0; j < this.Food.length; j++) {
-                if ((this.mySnake[i].v[0].x - this.Food[j].x) * (this.mySnake[i].v[0].x - this.Food[j].x) + (this.mySnake[i].v[0].y - this.Food[j].y) * (this.mySnake[i].v[0].y - this.Food[j].y) < 1.5 * this.mySnake[i].size * this.mySnake[i].size) {
+                if (
+                    (this.mySnake[i].v[0].x - this.Food[j].x) *
+                        (this.mySnake[i].v[0].x - this.Food[j].x) +
+                        (this.mySnake[i].v[0].y - this.Food[j].y) *
+                            (this.mySnake[i].v[0].y - this.Food[j].y) <
+                    1.5 * this.mySnake[i].size * this.mySnake[i].size
+                ) {
                     this.mySnake[i].score += Math.floor(this.Food[j].value);
-                    this.Food[j] = new Food(this, this.getSize() / (5 + Math.random() * 10), (Math.random() - Math.random()) * 5000 + this.XX, (Math.random() - Math.random()) * 5000 + this.YY);
+                    this.Food[j] = new Food(
+                        this,
+                        this.getSize() / (5 + this.random.next() * 10),
+                        (this.random.next() - this.random.next()) * 5000 + this.XX,
+                        (this.random.next() - this.random.next()) * 5000 + this.YY,
+                    );
                 }
             }
     }
@@ -297,23 +388,49 @@ class game {
                 if (i != j) {
                     let kt = true;
                     for (let k = 0; k < this.mySnake[j].v.length; k++)
-                        if (this.range(this.mySnake[i].v[0].x, this.mySnake[i].v[0].y, this.mySnake[j].v[k].x, this.mySnake[j].v[k].y) < this.mySnake[i].size)
+                        if (
+                            this.range(
+                                this.mySnake[i].v[0].x,
+                                this.mySnake[i].v[0].y,
+                                this.mySnake[j].v[k].x,
+                                this.mySnake[j].v[k].y,
+                            ) < this.mySnake[i].size
+                        )
                             kt = false;
                     if (!kt) {
                         for (let k = 0; k < this.mySnake[i].v.length; k += 5) {
-                            this.Food[index] = new Food(this, this.getSize() / (2 + Math.random() * 2), this.mySnake[i].v[k].x + Math.random() * this.mySnake[i].size / 2, this.mySnake[i].v[k].y + Math.random() * this.mySnake[i].size / 2);
-                            this.Food[index++].value = 0.4 * this.mySnake[i].score / (this.mySnake[i].v.length / 5);
-                            if (index >= this.Food.length)
-                                index = 0;
+                            this.Food[index] = new Food(
+                                this,
+                                this.getSize() / (2 + this.random.next() * 2),
+                                this.mySnake[i].v[k].x +
+                                    (this.random.next() * this.mySnake[i].size) / 2,
+                                this.mySnake[i].v[k].y +
+                                    (this.random.next() * this.mySnake[i].size) / 2,
+                            );
+                            this.Food[index++].value =
+                                (0.4 * this.mySnake[i].score) /
+                                (this.mySnake[i].v.length / 5);
+                            if (index >= this.Food.length) index = 0;
                         }
 
                         if (i != 0) {
                             this.mySnake[i] = new snake(
-                                names[Math.floor(Math.random() * 99999) % names.length], 
-                                this, 
-                                Math.max(Math.floor((this.mySnake[0].score > 10 * this.minScore) ? this.mySnake[0].score / 10 : this.minScore), this.mySnake[i].score / 10), 
-                                this.randomXY(this.XX), 
-                                this.randomXY(this.YY)
+                                names[
+                                    Math.floor(this.random.next() * 99999) %
+                                        names.length
+                                ],
+                                this,
+                                Math.max(
+                                    Math.floor(
+                                        this.mySnake[0].score >
+                                            10 * this.minScore
+                                            ? this.mySnake[0].score / 10
+                                            : this.minScore,
+                                    ),
+                                    this.mySnake[i].score / 10,
+                                ),
+                                this.randomXY(this.XX),
+                                this.randomXY(this.YY),
                             );
                         } else {
                             console.log("Game Over! Restarting...");
@@ -357,32 +474,45 @@ class game {
         this.XX = 0;
         this.YY = 0;
         this.chX = this.chY = 1;
-    
+
         // Reset speed variables
-        SPEED = 1;   // Reset speed to default
+        SPEED = 1; // Reset speed to default
         this.MaxSpeed = this.getSize() / 7; // Restore max speed
 
         // Reinitialize player snake
-        this.mySnake[0] = new snake("HaiZuka", this, this.minScore, this.game_W / 2, this.game_H / 2);
-        this.mySnake[0].speed = 1;  // Explicitly reset player snake's speed
+        this.mySnake[0] = new snake(
+            "HaiZuka",
+            this,
+            this.minScore,
+            this.game_W / 2,
+            this.game_H / 2,
+        );
+        this.mySnake[0].speed = 1; // Explicitly reset player snake's speed
 
         // Reinitialize AI snakes
         for (let i = 1; i < Nsnake; i++) {
             this.mySnake[i] = new snake(
-                names[Math.floor(Math.random() * 99999) % names.length], 
-                this, 
-                Math.floor(2 * this.minScore + Math.random() * 2 * this.minScore), 
-                (Math.random() - Math.random()) * this.sizeMap, 
-                (Math.random() - Math.random()) * this.sizeMap
+                names[Math.floor(this.random.next() * 99999) % names.length],
+                this,
+                Math.floor(
+                    2 * this.minScore + this.random.next() * 2 * this.minScore,
+                ),
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
             );
-            this.mySnake[i].speed = 1;  // Reset AI snake speeds
+            this.mySnake[i].speed = 1; // Reset AI snake speeds
         }
-    
+
         // Reinitialize food
         for (let i = 0; i < this.NFood; i++) {
-            this.Food[i] = new Food(this, this.getSize() / (7 + Math.random() * 10), (Math.random() - Math.random()) * this.sizeMap, (Math.random() - Math.random()) * this.sizeMap);
+            this.Food[i] = new Food(
+                this,
+                this.getSize() / (7 + this.random.next() * 10),
+                (this.random.next() - this.random.next()) * this.sizeMap,
+                (this.random.next() - this.random.next()) * this.sizeMap,
+            );
         }
-    
+
         // Restart the game loop
         this.loop();
     }
@@ -419,10 +549,10 @@ class game {
     //     }
     // }
 
-    clearScreen() {
-        this.context.clearRect(0, 0, this.game_W, this.game_H);
-        // this.context.drawImage(this.bg_im, this.Xfocus, this.Yfocus, 1.5 * this.game_W, 1.5 * this.game_H, 0, 0, this.game_W, this.game_H);
-    }
+    // clearScreen() {
+    //     this.context.clearRect(0, 0, this.game_W, this.game_H);
+    //     // this.context.drawImage(this.bg_im, this.Xfocus, this.Yfocus, 1.5 * this.game_W, 1.5 * this.game_H, 0, 0, this.game_W, this.game_H);
+    // }
 
     getSize() {
         var area = this.game_W * this.game_H;
@@ -436,32 +566,18 @@ class game {
     randomXY(n) {
         let ans = 0;
         while (Math.abs(ans) < 1) {
-            ans = 3 * Math.random() - 3 * Math.random();
+            ans = 3 * this.random.next() - 3 * this.random.next();
         }
         return ans * this.sizeMap + n;
     }
 
     isPoint(x, y) {
-        if (x - this.XX < -3 * this.getSize())
-            return false;
-        if (y - this.YY < -3 * this.getSize())
-            return false;
-        if (x - this.XX > this.game_W + 3 * this.getSize())
-            return false;
-        if (y - this.YY > this.game_H + 3 * this.getSize())
-            return false;
+        if (x - this.XX < -3 * this.getSize()) return false;
+        if (y - this.YY < -3 * this.getSize()) return false;
+        if (x - this.XX > this.game_W + 3 * this.getSize()) return false;
+        if (y - this.YY > this.game_H + 3 * this.getSize()) return false;
         return true;
     }
 }
 
-
-// // At the bottom of your JS file
-// console.log("Game script loaded");  // This should show up when the page loads
-
-// setInterval(() => {
-//     console.log("Interval tick");  // This should appear every 100ms
-//     sendGameState();
-// }, 100);
-
-// var g = new game();
-export default game
+export default game;
