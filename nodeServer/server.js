@@ -1,16 +1,17 @@
+import { createServer } from "http"; // Importing createServer
 import express from "express";
+import { WebSocketServer } from "ws"; // Importing WebSocketServer
+
 import Game from "./slither.io/js/game.js";
-import game from "./slither.io/js/game.js";
+
 const app = express();
+const server = createServer(app); // Use createServer to handle both HTTP requests and WebSocket
+
+const wss = new WebSocketServer({ server }); // Create WebSocket server attached to the same HTTP server
 
 const PORT = process.env.PORT || 3000;
-
-// Middleware to parse JSON requests
-app.use(express.json());
-
 let g = null;
 
-//start game instance here
 
 // Basic route
 app.get("/", (req, res) => {
@@ -61,9 +62,49 @@ app.get("/reset", (req, res) => {
         die,
         1
     );
-    //handle game stuff
-    res.send("Game after reset");
+
+// Basic route
+app.get("/", (req, res) => {
+    res.send("Hello, Node.js server!");
 });
+
+app.get("/step", (req, res) => {
+    let gameState = g.getState();
+    console.log(gameState);
+    res.send(""); // Respond with game state or an empty response
+});
+
+// app.get("/reset", (req, res) => {
+//     let game_H = 500;
+//     let game_W = 500;
+//     let SPEED = 1;
+//     let MaxSpeed = 0;
+//     let mySnake = [];
+//     let FOOD = [];
+//     let NFood = 2000;
+//     let Nsnake = 20;
+//     let sizeMap = 2000;
+//     let index = 0;
+//     let minScore = 200;
+//     let die = false;
+
+//     g = new Game(
+//         game_W,
+//         game_H,
+//         SPEED,
+//         MaxSpeed,
+//         mySnake,
+//         FOOD,
+//         NFood,
+//         Nsnake,
+//         sizeMap,
+//         index,
+//         minScore,
+//         die,
+//         1
+//     );
+//     res.send("Game after reset");
+// });
 
 app.get("/state", (req, res) => {
     //do step stuff
@@ -76,9 +117,29 @@ app.get("/state", (req, res) => {
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// WebSocket connection handler
+wss.on("connection", (ws) => {
+    console.log("New client connected");
+    
+    // Send initial game state to the client
+    if (g) {
+        console.log("Sending game state to client");
+        ws.send(JSON.stringify(g.getState())); // Send game state as JSON
+    }
+
+    // Handle game step updates or any other interaction
+    ws.on("message", (message) => {
+        console.log("Received: %s", message);
+        // Respond to the game updates or interactions here
+        // E.g., handle user input, game step updates, etc.
+    });
+
+    ws.on("close", () => {
+        console.log("Client disconnected");
+    });
 });
 
-export default app; // Export the Express app
+// Start the server
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
