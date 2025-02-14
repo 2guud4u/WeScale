@@ -1,15 +1,64 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Slither.io | HaiZuka</title>
-        <link rel="stylesheet" href="css/style.css" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-        />
-    </head>
-    <body></body>
-    <script type="text/javascript" src="js/food.js"></script>
-    <script type="text/javascript" src="js/snake.js"></script>
-    <script type="text/javascript" src="js/game.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slither.io Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Slither.io Game</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Create a WebSocket connection to the server
+        const socket = new WebSocket('ws://localhost:3000'); // Replace with your server's address
+
+        // Handle connection open
+        socket.addEventListener('open', () => {
+            console.log('Connected to the server');
+        });
+
+        // Handle receiving game state from the server
+        socket.addEventListener('message', (event) => {
+            // Parse the incoming message (assuming it's JSON)
+            const gameState = JSON.parse(event.data);
+
+            // Clear the canvas before drawing
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the game state (simplified example)
+            gameState.forEach(snake => {
+                ctx.beginPath();
+                ctx.arc(snake.x, snake.y, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = "green";
+                ctx.fill();
+            });
+        });
+
+        // Handle connection close
+        socket.addEventListener('close', () => {
+            console.log('Disconnected from the server');
+        });
+
+        // Handle connection errors
+        socket.addEventListener('error', (error) => {
+            console.error('WebSocket error:', error);
+        });
+
+        // Optional: send data to the server (e.g., player input)
+        document.addEventListener('keydown', (event) => {
+            const input = { key: event.key }; // Example input format
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(input));
+            }
+        });
+    </script>
+</body>
 </html>
