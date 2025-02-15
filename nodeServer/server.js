@@ -32,8 +32,8 @@ app.get("/step", (req, res) => {
     });
 });
 
-app.get("/reset", (req, res) => {
-    //reset game env with random
+// app.get("/reset", (req, res) => {
+//     //reset game env with random
     let game_H = 500;
     let game_W = 500;
     let SPEED = 1;
@@ -62,6 +62,11 @@ app.get("/reset", (req, res) => {
         die,
         1
     );
+// });
+
+console.log("Printing game context")
+console.log(g.context)
+
 
 // Basic route
 app.get("/", (req, res) => {
@@ -124,7 +129,7 @@ wss.on("connection", (ws) => {
     // Send initial game state to the client
     if (g) {
         console.log("Sending game state to client");
-        ws.send(JSON.stringify(g.getState())); // Send game state as JSON
+        ws.send(JSON.stringify(g.getGameState())); // Send game state as JSON
     }
 
     // Handle game step updates or any other interaction

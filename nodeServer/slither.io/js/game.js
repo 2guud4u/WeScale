@@ -46,6 +46,7 @@ function sendGameState() {
     .then(data => console.log("Server response:", data))
     .catch(err => console.error("Error sending game state:", err));
 }
+
 let names = ["Ahmed Steinke",
     "Aubrey Brass",
     "Johanne Boothe",
@@ -107,6 +108,7 @@ let names = ["Ahmed Steinke",
     "Laurence Hanning",
     "NamZ Bede",
 ];
+
 class DeterministicRandom {
     constructor(seed) {
       this.seed = seed % 2147483647; // Ensure seed is within range
