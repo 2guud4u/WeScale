@@ -1,4 +1,4 @@
-// import { createCanvas, loadImage } from "canvas";
+import { createCanvas, loadImage } from "canvas";
 
 class snake {
     constructor(name, score, x, y, game_W, game_H) {
@@ -9,6 +9,7 @@ class snake {
         this.Nball = 13;
         this.game_W = game_W;
         this.game_H = game_H;
+        this.v = []
 
         this.init();
     }
@@ -28,6 +29,12 @@ class snake {
 
         this.v = [];
         for (let i = 0; i < 50; i++) this.v[i] = { x: this.x, y: this.y };
+        // this.sn_im = new Image();
+        this.sn_im = "images/head.png";
+        // this.bd_im = new Image();
+        this.bd_im = "images/body/" + Math.floor(Math.random() * 999999) % this.Nball + ".png";
+
+
         // loadImage("public/images/head.png")
         //     .then((img) => {
         //         this.sn_im = img;
@@ -41,7 +48,7 @@ class snake {
         //         ".png",
         // )
         //     .then((img) => {
-        //         this.sn_im = img;
+        //         this.bd_im = img;
         //         //console.log("Image loaded in Node.js!");
         //     })
         //     .catch((err) => console.error("Image loading error:", err));
@@ -49,13 +56,17 @@ class snake {
 
     toJSON() {
         return {
-            snake_x: this.v[0].x,
-            snake_y: this.v[0].y,
+            x: this.x,
+            y: this.y,
+            Nball: this.Nball,
+            v: this.v,
             snake_length: this.v.length,
             score: this.score,
             size: this.size,
             speed: this.speed,
             angle: this.angle,
+            sn_im: this.sn_im,
+            bd_im: this.bd_im,
         };
     }
 
@@ -139,15 +150,15 @@ class snake {
     draw() {
         this.update();
 
-        for (let i = this.v.length - 1; i >= 1; i--)
-            if (this.game.isPoint(this.v[i].x, this.v[i].y))
-                this.game.context.drawImage(this.bd_im, this.v[i].x - XX - (this.size) / 2, this.v[i].y - YY - (this.size) / 2, this.size, this.size);
+        // for (let i = this.v.length - 1; i >= 1; i--)
+        //     if (this.game.isPoint(this.v[i].x, this.v[i].y))
+        //         this.game.context.drawImage(this.bd_im, this.v[i].x - XX - (this.size) / 2, this.v[i].y - YY - (this.size) / 2, this.size, this.size);
 
-        this.game.context.save();
-        this.game.context.translate(this.v[0].x - XX, this.v[0].y - YY);
-        this.game.context.rotate(this.angle - Math.PI / 2);
-        this.game.context.drawImage(this.sn_im, -this.size / 2, -this.size / 2, this.size, this.size);
-        this.game.context.restore();
+        // this.game.context.save();
+        // this.game.context.translate(this.v[0].x - XX, this.v[0].y - YY);
+        // this.game.context.rotate(this.angle - Math.PI / 2);
+        // this.game.context.drawImage(this.sn_im, -this.size / 2, -this.size / 2, this.size, this.size);
+        // this.game.context.restore();
     }
 
     getAngle(a, b) {

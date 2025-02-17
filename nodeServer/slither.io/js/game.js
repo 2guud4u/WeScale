@@ -191,9 +191,6 @@ class game {
         this.listenTouch();
     }
 
-    getState() {
-        return this.mySnake;
-    }
 
     listenTouch() {
         // document.addEventListener("touchmove", evt => {
@@ -240,7 +237,7 @@ class game {
         // // console.log(`Time since last loop: ${now - lastLoopTime} ms`);
         // lastLoopTime = now;
 
-        // this.update();
+        this.update();
         // this.render(); // used to be inside this.update()
         // this.draw();
 
@@ -420,32 +417,15 @@ class game {
                 }
     }
 
-    // render() {
-    //     if (this.canvas.width != document.documentElement.clientWidth || this.canvas.height != document.documentElement.clientHeight) {
-    //         this.canvas.width = document.documentElement.clientWidth;
-    //         this.canvas.height = document.documentElement.clientHeight;
-    //         this.game_W = this.canvas.width;
-    //         this.game_H = this.canvas.height;
-    //         SPEED = this.getSize() / 7;
-    //         SPEED = 1;
-    //         this.MaxSpeed = this.getSize() / 7;
-    //         if (this.mySnake.length == 0)
-    //             return;
-    //         if (this.mySnake[0].v != null) {
-    //             this.mySnake[0].v[0].x = this.XX + this.game_W / 2;
-    //             this.mySnake[0].v[0].y = this.YY + this.game_H / 2;
-    //         }
-    //     }
-    // }
 
-    draw() {
-        this.clearScreen();
-        for (let i = 0; i < this.Food.length; i++)
-            this.Food[i].draw();
-        for (let i = 0; i < this.mySnake.length; i++)
-            this.mySnake[i].draw();
-        this.drawScore();
-    }
+    // draw() {
+    //     this.clearScreen();
+    //     for (let i = 0; i < this.Food.length; i++)
+    //         this.Food[i].draw();
+    //     for (let i = 0; i < this.mySnake.length; i++)
+    //         this.mySnake[i].draw();
+    //     // this.drawScore();
+    // }
 
     restartGame() {
         die = false;
@@ -530,19 +510,12 @@ class game {
     //     }
     // }
 
-    clearScreen() {
-        this.context.clearRect(0, 0, this.game_W, this.game_H);
-        this.context.drawImage(this.bg_im, this.Xfocus, this.Yfocus, 1.5 * this.game_W, 1.5 * this.game_H, 0, 0, this.game_W, this.game_H);
-    }
 
     getSize() {
         var area = this.game_W * this.game_H;
         return Math.sqrt(area / 300);
     }
 
-    // getContext() {
-    //     return this.context;
-    // }   
 
     range(a, b, c, d) {
         return Math.sqrt((a - c) * (a - c) + (b - d) * (b - d));
@@ -589,6 +562,11 @@ class game {
             index: this.index,
             minScore: this.minScore,
             die: this.die,
+            XX: this.XX,
+            YY: this.YY,
+            Xfocus: this.Xfocus,
+            Yfocus: this.Yfocus,
+
         };
     }
 }

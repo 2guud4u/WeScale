@@ -40,11 +40,11 @@
         };
 
         // Function to resize the canvas
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            ctx.drawImage(bg_im, 0, 0, canvas.width, canvas.height);
-        }
+        // function resizeCanvas() {
+        //     canvas.width = window.innerWidth;
+        //     canvas.height = window.innerHeight;
+        //     ctx.drawImage(bg_im, 0, 0, canvas.width, canvas.height);
+        // }
 
         // Assuming `socket` is your WebSocket connection
         function sendCanvasSizeToServer() {
@@ -56,23 +56,22 @@
             socket.send(JSON.stringify({ type: 'canvasResize', data: canvasSize }));
         }
 
+        // Initialize the renderer
+        const renderer = new Renderer(canvas, ctx, bg_im);
+
         // Call the resize function initially
-        resizeCanvas();
+        renderer.resizeCanvas();
 
         // Update the canvas size whenever the window is resized
         window.addEventListener('resize', () => {
-            resizeCanvas();
-
-            // Optionally, you might want to clear the canvas here
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            // // Optionally, you might want to clear the canvas here
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            renderer.resizeCanvas();
             // Notify the server about the new size
             sendCanvasSizeToServer();
         });
         
 
-        // Initialize the renderer
-        const renderer = new Renderer(canvas);
 
         // Create a WebSocket connection to the server
         const socket = new WebSocket('ws://localhost:3000'); // Replace with your server's address
@@ -87,10 +86,14 @@
             // Parse the incoming message (assuming it's JSON)
             const gameState = JSON.parse(event.data);
 
-            console.log(gameState);
+            console.log("Rendering...");
+            // console.log(gameState);
 
-            // Clear the canvas before drawing
-            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Render the game state
+            renderer.updateState(gameState);
+            renderer.render();
+            renderer.draw();
+            console.log("Rendered!");
 
         });
 
@@ -112,15 +115,6 @@
         //     }
         // });
 
-        // function resizeCanvas() {
-        //     console.log("Resizing canvas...");
-        //     // Adjust canvas size to match the window size
-        //     canvas.width = window.innerWidth;
-        //     canvas.height = window.innerHeight;
-
-        //     // Redraw the background
-        //     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-        // }
     </script>
 </body>
 </html>
