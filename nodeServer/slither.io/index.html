@@ -4,18 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Slither.io Game</title>
-    <style>
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- <style>
         canvas {
             border: 1px solid black;
         }
-    </style>
+    </style>  -->
 </head>
 <body>
-    <h1>Slither.io Game</h1>
+    <!-- <h1>Slither.io Game</h1> -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script>
+     <!-- <script type="module" src="js/renderer.js"></script> -->
+    <script type="module">
+
+
+        // function isPoint(x, y) {
+        //     if (x - this.XX < -3 * this.getSize()) return false;
+        //     if (y - this.YY < -3 * this.getSize()) return false;
+        //     if (x - this.XX > this.game_W + 3 * this.getSize()) return false;
+        //     if (y - this.YY > this.game_H + 3 * this.getSize()) return false;
+        //     return true;
+        // }
+
+        import Renderer from './js/renderer.js';
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        document.body.appendChild(canvas);
+
+        const bg_im = new Image();
+        bg_im.src = "images/Map2.png";
+
+        bg_im.onload = function() {
+            console.log("Drawing image...");
+            ctx.drawImage(bg_im, 0, 0, canvas.width, canvas.height);
+        };
+
+        // Function to resize the canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.drawImage(bg_im, 0, 0, canvas.width, canvas.height);
+        }
+
+        // Assuming `socket` is your WebSocket connection
+        function sendCanvasSizeToServer() {
+            const canvasSize = {
+                width: canvas.width,
+                height: canvas.height
+            };
+            // Send the size to the server as JSON
+            socket.send(JSON.stringify({ type: 'canvasResize', data: canvasSize }));
+        }
+
+        // Call the resize function initially
+        resizeCanvas();
+
+        // Update the canvas size whenever the window is resized
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+
+            // Optionally, you might want to clear the canvas here
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Notify the server about the new size
+            sendCanvasSizeToServer();
+        });
+        
+
+        // Initialize the renderer
+        const renderer = new Renderer(canvas);
 
         // Create a WebSocket connection to the server
         const socket = new WebSocket('ws://localhost:3000'); // Replace with your server's address
@@ -30,16 +87,11 @@
             // Parse the incoming message (assuming it's JSON)
             const gameState = JSON.parse(event.data);
 
-            // Clear the canvas before drawing
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            console.log(gameState);
 
-            // Draw the game state (simplified example)
-            gameState.forEach(snake => {
-                ctx.beginPath();
-                ctx.arc(snake.x, snake.y, 10, 0, 2 * Math.PI);
-                ctx.fillStyle = "green";
-                ctx.fill();
-            });
+            // Clear the canvas before drawing
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         });
 
         // Handle connection close
@@ -52,13 +104,23 @@
             console.error('WebSocket error:', error);
         });
 
-        // Optional: send data to the server (e.g., player input)
-        document.addEventListener('keydown', (event) => {
-            const input = { key: event.key }; // Example input format
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify(input));
-            }
-        });
+        // // Optional: send data to the server (e.g., player input)
+        // document.addEventListener('keydown', (event) => {
+        //     const input = { key: event.key }; // Example input format
+        //     if (socket.readyState === WebSocket.OPEN) {
+        //         socket.send(JSON.stringify(input));
+        //     }
+        // });
+
+        // function resizeCanvas() {
+        //     console.log("Resizing canvas...");
+        //     // Adjust canvas size to match the window size
+        //     canvas.width = window.innerWidth;
+        //     canvas.height = window.innerHeight;
+
+        //     // Redraw the background
+        //     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        // }
     </script>
 </body>
 </html>

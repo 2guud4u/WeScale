@@ -1,4 +1,4 @@
-import { createCanvas, loadImage } from "canvas";
+// import { createCanvas, loadImage } from "canvas";
 import snake from "./snake.js"
 import Food from "./food.js"
 
@@ -26,26 +26,6 @@ function getGameState() {
     return state;
 }
 
-function sendGameState() {
-    const state = getGameState();
-    console.log("Attempting to send state:", state);  // Log the state being sent
-    
-    fetch("http://localhost:5000/state", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        mode: "cors",
-        body: JSON.stringify(state)
-    })
-    .then(response => {
-        console.log("Response received:", response.status);  // Log the response status
-        return response.json();
-    })
-    .then(data => console.log("Server response:", data))
-    .catch(err => console.error("Error sending game state:", err));
-}
 
 let names = ["Ahmed Steinke",
     "Aubrey Brass",
@@ -121,7 +101,6 @@ class DeterministicRandom {
     }
   }
 
-
 class game {
     constructor(
         game_W,
@@ -161,12 +140,12 @@ class game {
         this.chX = 0;
         this.bg_im = null;
         this.random = new DeterministicRandom(seed)
-        loadImage("public/images/Map2.png")
-            .then((img) => {
-                this.bg_im = img;
-                //console.log("Image loaded in Node.js!");
-            })
-            .catch((err) => console.error("Image loading error:", err));
+        // loadImage("public/images/Map2.png")
+        //     .then((img) => {
+        //         this.bg_im = img;
+        //         //console.log("Image loaded in Node.js!");
+        //     })
+        //     .catch((err) => console.error("Image loading error:", err));
         this.init();
 
     }
@@ -175,31 +154,30 @@ class game {
         // this.canvas = document.createElement("canvas");
         // this.context = this.canvas.getContext("2d");
         // document.body.appendChild(this.canvas);
-        // this.canvas = createCanvas(800, 600)
-        // this.context = this.canvas.getContext("2d");
-        // this.render();
+
         console.log("random",this.random)
         for (let i = 0; i < this.Nsnake; i++)
             this.mySnake[i] = new snake(
                 names[Math.floor(this.random.next() * 99999) % names.length],
-                this,
                 Math.floor(
                     2 * this.minScore + this.random.next() * 2 * this.minScore,
                 ),
                 (this.random.next() - this.random.next()) * this.sizeMap,
                 (this.random.next() - this.random.next()) * this.sizeMap,
+                this.game_W,
+                this.game_H
             );
 
         this.mySnake[0] = new snake(
             "HaiZuka",
-            this,
             0,
             this.game_W / 2,
             this.game_H / 2,
+            this.game_W,
+            this.game_H
         );
         for (let i = 0; i < this.NFood; i++) {
             let newFood = new Food(
-                this,
                 this.getSize() / (7 + this.random.next() * 10),
                 (this.random.next() - this.random.next()) * this.sizeMap,
                 (this.random.next() - this.random.next()) * this.sizeMap,
@@ -216,6 +194,7 @@ class game {
     getState() {
         return this.mySnake;
     }
+
     listenTouch() {
         // document.addEventListener("touchmove", evt => {
         //     var y = evt.touches[0].pageY;
@@ -261,10 +240,11 @@ class game {
         // // console.log(`Time since last loop: ${now - lastLoopTime} ms`);
         // lastLoopTime = now;
 
-        this.update();
         // this.update();
-        // this.update();
+        // this.render(); // used to be inside this.update()
         // this.draw();
+
+        console.log("Game loop running...");
 
         if (this.loopID) {
             clearTimeout(this.loopID);
@@ -276,9 +256,9 @@ class game {
         let chX = (inputX - this.game_W / 2) / 15;
         let chY = (inputY - this.game_H / 2) / 15;
         // this.render();
-        this.unFood();
-        this.changeFood();
-        this.changeSnake();
+        this.unFood(); // Check if snake eats food, no visual change
+        this.changeFood();  // Change food position, no visual change
+        this.changeSnake(); // Change snake position, no visual change
         this.updateChXY();
         this.checkDie();
 
@@ -334,7 +314,6 @@ class game {
                 ) > this.sizeMap
             ) {
                 this.Food[i] = new Food(
-                    this,
                     this.getSize() / (10 + this.random.next() * 10),
                     (this.random.next() - this.random.next()) * this.sizeMap +
                         this.mySnake[0].v[0].x,
@@ -375,7 +354,6 @@ class game {
                 ) {
                     this.mySnake[i].score += Math.floor(this.Food[j].value);
                     this.Food[j] = new Food(
-                        this,
                         this.getSize() / (5 + this.random.next() * 10),
                         (this.random.next() - this.random.next()) * 5000 + this.XX,
                         (this.random.next() - this.random.next()) * 5000 + this.YY,
@@ -402,7 +380,6 @@ class game {
                     if (!kt) {
                         for (let k = 0; k < this.mySnake[i].v.length; k += 5) {
                             this.Food[index] = new Food(
-                                this,
                                 this.getSize() / (2 + this.random.next() * 2),
                                 this.mySnake[i].v[k].x +
                                     (this.random.next() * this.mySnake[i].size) / 2,
@@ -421,7 +398,6 @@ class game {
                                     Math.floor(this.random.next() * 99999) %
                                         names.length
                                 ],
-                                this,
                                 Math.max(
                                     Math.floor(
                                         this.mySnake[0].score >
@@ -433,6 +409,8 @@ class game {
                                 ),
                                 this.randomXY(this.XX),
                                 this.randomXY(this.YY),
+                                this.game_W,
+                                this.game_H
                             );
                         } else {
                             console.log("Game Over! Restarting...");
@@ -460,14 +438,14 @@ class game {
     //     }
     // }
 
-    // draw() {
-    //     this.clearScreen();
-    //     for (let i = 0; i < this.Food.length; i++)
-    //         this.Food[i].draw();
-    //     for (let i = 0; i < this.mySnake.length; i++)
-    //         this.mySnake[i].draw();
-    //     this.drawScore();
-    // }
+    draw() {
+        this.clearScreen();
+        for (let i = 0; i < this.Food.length; i++)
+            this.Food[i].draw();
+        for (let i = 0; i < this.mySnake.length; i++)
+            this.mySnake[i].draw();
+        this.drawScore();
+    }
 
     restartGame() {
         die = false;
@@ -484,10 +462,11 @@ class game {
         // Reinitialize player snake
         this.mySnake[0] = new snake(
             "HaiZuka",
-            this,
             this.minScore,
             this.game_W / 2,
             this.game_H / 2,
+            this.game_W,
+            this.game_H
         );
         this.mySnake[0].speed = 1; // Explicitly reset player snake's speed
 
@@ -495,12 +474,13 @@ class game {
         for (let i = 1; i < Nsnake; i++) {
             this.mySnake[i] = new snake(
                 names[Math.floor(this.random.next() * 99999) % names.length],
-                this,
                 Math.floor(
                     2 * this.minScore + this.random.next() * 2 * this.minScore,
                 ),
                 (this.random.next() - this.random.next()) * this.sizeMap,
                 (this.random.next() - this.random.next()) * this.sizeMap,
+                this.game_W,
+                this.game_H
             );
             this.mySnake[i].speed = 1; // Reset AI snake speeds
         }
@@ -508,7 +488,6 @@ class game {
         // Reinitialize food
         for (let i = 0; i < this.NFood; i++) {
             this.Food[i] = new Food(
-                this,
                 this.getSize() / (7 + this.random.next() * 10),
                 (this.random.next() - this.random.next()) * this.sizeMap,
                 (this.random.next() - this.random.next()) * this.sizeMap,
@@ -551,15 +530,19 @@ class game {
     //     }
     // }
 
-    // clearScreen() {
-    //     this.context.clearRect(0, 0, this.game_W, this.game_H);
-    //     // this.context.drawImage(this.bg_im, this.Xfocus, this.Yfocus, 1.5 * this.game_W, 1.5 * this.game_H, 0, 0, this.game_W, this.game_H);
-    // }
+    clearScreen() {
+        this.context.clearRect(0, 0, this.game_W, this.game_H);
+        this.context.drawImage(this.bg_im, this.Xfocus, this.Yfocus, 1.5 * this.game_W, 1.5 * this.game_H, 0, 0, this.game_W, this.game_H);
+    }
 
     getSize() {
         var area = this.game_W * this.game_H;
         return Math.sqrt(area / 300);
     }
+
+    // getContext() {
+    //     return this.context;
+    // }   
 
     range(a, b, c, d) {
         return Math.sqrt((a - c) * (a - c) + (b - d) * (b - d));
@@ -573,12 +556,40 @@ class game {
         return ans * this.sizeMap + n;
     }
 
+    updateCanvasSize(width, height) {
+        this.game_H = height;
+        this.game_W = width;
+
+        for (let i = 0; i < this.Nsnake; i++) {
+            this.mySnake[i].game_H = height;
+            this.mySnake[i].game_W = width;
+        }
+        console.log("Canvas size updated to", width, "x", height);
+    }
+
     isPoint(x, y) {
         if (x - this.XX < -3 * this.getSize()) return false;
         if (y - this.YY < -3 * this.getSize()) return false;
         if (x - this.XX > this.game_W + 3 * this.getSize()) return false;
         if (y - this.YY > this.game_H + 3 * this.getSize()) return false;
         return true;
+    }
+
+    toJSON() {
+        return {
+            game_W: this.game_W,
+            game_H: this.game_H,
+            speed: this.speed,
+            MaxSpeed: this.MaxSpeed,
+            mySnake: this.mySnake.map((snake) => snake.toJSON()), // Serialize snake objects
+            Food: this.Food.map((food) => food.toJSON()), // Serialize food objects
+            NFood: this.NFood,
+            Nsnake: this.Nsnake,
+            sizeMap: this.sizeMap,
+            index: this.index,
+            minScore: this.minScore,
+            die: this.die,
+        };
     }
 }
 
