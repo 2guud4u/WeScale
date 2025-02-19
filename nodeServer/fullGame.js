@@ -332,7 +332,7 @@ class snake {
                                 this.mySnake[i] = new snake(this.names[Math.floor(Math.random() * 99999) % this.names.length], this, Math.max(Math.floor((this.mySnake[0].score > 10 * this.minScore) ? this.mySnake[0].score / 10 : this.minScore), this.mySnake[i].score / 10), this.randomXY(this.XX), this.randomXY(this.YY));
                             else {
                                 // window.alert("Your Score: " + Math.floor(mySnake[i].score));
-                                // die = true;
+                                this.die = true;
                                 // window.location.href = ".";
                             }
                         }

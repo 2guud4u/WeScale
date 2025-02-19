@@ -41,11 +41,14 @@ app.get("/step/:x/:y", (req, res) => {
 });
 
 function PreProcessGameState(game){
-    let snakesData = game.mySnake.map(snake => ({ body: snake.v, size: snake.size }));
-    let foodData = game.FOOD.map(food=>({foodLoc: (food.x, food.y), size: food.size}))
+    let snakesData = game.mySnake.map(snake => ({ body: snake.v, size: snake.size, score: snake.score, name:  snake.name}));
+    let foodData = game.FOOD.map(food=>({foodLoc: (food.x, food.y), size: food.size}));
+    let dieData = game.die
     return {
-        foodData: foodData,
-        snakesData: snakesData
+        foodList: foodData,
+        otherSnakesList: snakesData.slice(1),
+        mySnake:  snakesData[0],
+        dieBool: dieData
     }
 }
 // app.get("/reset", (req, res) => {
@@ -120,7 +123,7 @@ app.get("/reset", (req, res) => {
     //     1
     // );
     g= new closedGame()
-    res.send("Game after reset");
+    res.send("Game created again");
 });
 
 app.get("/state", (req, res) => {
@@ -130,7 +133,7 @@ app.get("/state", (req, res) => {
     if (!gameState) {
         res.status(500).json({ error: "Failed to get game state" });
     } else {
-        res.send(gameState);
+        res.json(PreProcessGameState(g));
     }
 });
 

@@ -1,8 +1,21 @@
 from enum import Enum
 import gymnasium as gym
 from gymnasium import spaces
-import pygame
+import json
 import numpy as np
+import requests
+
+baseUrl = "http://localhost:3000"  # Change port if needed
+
+
+def sendGetRequest(url):
+    try:
+        response = requests.get(url)
+        return response.text
+    except:
+        print(response)
+        return
+    
 
 GameConfig = {
     "game_H": 1000,
@@ -47,7 +60,7 @@ class GridWorldEnv(gym.Env):
         )
 
         # We have 8 actions, corresponding to "right", "up", "left", "down", "up-right", "up-left", "down-right", "down-left"
-        self.action_space = spaces.Discrete(8)
+        self.action_space = spaces.Box(low=np.array([-1000, -1000]), high=np.array([1000, 1000]), dtype=np.int32)
 
         """
         The following dictionary maps abstract actions from `self.action_space` to 
@@ -83,51 +96,32 @@ class GridWorldEnv(gym.Env):
 
     def _get_info(self):
         return {
-            "distance": np.linalg.norm(
-                self._agent_location - self._target_location, ord=1
-            )
+
         }
 
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
         
-
+        observation = {}
+        reward = 0
+        terminated = False
+        info = {}
 
         return observation, info
 
     def step(self, action):
-        # Map the action (element of {0,1,2,3}) to the direction we walk in
-        direction = self._action_to_direction[action]
-        # We use `np.clip` to make sure we don't leave the grid
-        self._agent_location = np.clip(
-            self._agent_location + direction, 0, self.size - 1
-        )
-        # An episode is done iff the agent has reached the target
-        terminated = np.array_equal(self._agent_location, self._target_location)
-        #reward = 1 if terminated else 0  # Binary sparse rewards
-        reward = 0
-        if self.ate_food():
-            reward += rewards["food"]
-        if self.grew():
-            reward += rewards["growth"]
-        if self.kill():
-            reward += rewards["kill"]
-        if self.move_away():
-            reward += rewards["away-food"]
-        if self.move_towards():
-            reward += rewards["towards-food"]
-        if self.died():
-            reward += rewards["die"]
-        else:
-            reward += rewards["survives"]
-        
-        observation = self._get_obs()
-        info = self._get_info()
+        x, y = action
 
-        if self.render_mode == "human":
-            self._render_frame()
+        stepUrl = baseUrl+"/step" + f"/{x}" + f"/{y}"
+        reqString = sendGetRequest(stepUrl)
+        reqDict = json.loads(reqString)
 
+
+        observation = {}
+        reward = reqDict.mySnake["score"]
+        terminated = reqDict["die"]
+        info = {}
         return observation, reward, terminated, False, info
 
     def render(self):
@@ -135,69 +129,13 @@ class GridWorldEnv(gym.Env):
             return self._render_frame()
 
     def _render_frame(self):
-        if self.window is None and self.render_mode == "human":
-            pygame.init()
-            pygame.display.init()
-            self.window = pygame.display.set_mode((self.window_size, self.window_size))
-        if self.clock is None and self.render_mode == "human":
-            self.clock = pygame.time.Clock()
-
-        canvas = pygame.Surface((self.window_size, self.window_size))
-        canvas.fill((255, 255, 255))
-        pix_square_size = (
-            self.window_size / self.size
-        )  # The size of a single grid square in pixels
-
-        # First we draw the target
-        pygame.draw.rect(
-            canvas,
-            (255, 0, 0),
-            pygame.Rect(
-                pix_square_size * self._target_location,
-                (pix_square_size, pix_square_size),
-            ),
-        )
-        # Now we draw the agent
-        pygame.draw.circle(
-            canvas,
-            (0, 0, 255),
-            (self._agent_location + 0.5) * pix_square_size,
-            pix_square_size / 3,
-        )
-
-        # Finally, add some gridlines
-        for x in range(self.size + 1):
-            pygame.draw.line(
-                canvas,
-                0,
-                (0, pix_square_size * x),
-                (self.window_size, pix_square_size * x),
-                width=3,
-            )
-            pygame.draw.line(
-                canvas,
-                0,
-                (pix_square_size * x, 0),
-                (pix_square_size * x, self.window_size),
-                width=3,
-            )
-
-        if self.render_mode == "human":
-            # The following line copies our drawings from `canvas` to the visible window
-            self.window.blit(canvas, canvas.get_rect())
-            pygame.event.pump()
-            pygame.display.update()
-
-            # We need to ensure that human-rendering occurs at the predefined framerate.
-            # The following line will automatically add a delay to
-            # keep the framerate stable.
-            self.clock.tick(self.metadata["render_fps"])
-        else:  # rgb_array
-            return np.transpose(
-                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
-            )
+        
+        return
 
     def close(self):
-        if self.window is not None:
-            pygame.display.quit()
-            pygame.quit()
+        return 
+
+if __name__ == "__main__":
+    reqString= sendGetRequest("http://localhost:3000/step/1/1")
+    reqDict = json.loads(reqString)
+    print(reqDict["mySnake"])
