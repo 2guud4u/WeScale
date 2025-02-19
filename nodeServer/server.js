@@ -151,7 +151,7 @@ wss.on("connection", (ws) => {
             uploadGameState();
             console.log("Uploaded game state");
         }
-    }, 30); // Interval in milliseconds (adjust based on your needs)
+    }, 3000); // Interval in milliseconds (adjust based on your needs)
 
 
     // Handle game step updates or any other interaction
