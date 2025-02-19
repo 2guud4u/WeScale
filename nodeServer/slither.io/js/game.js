@@ -1,9 +1,52 @@
 import { createCanvas, loadImage } from "canvas";
-import snake from "./snake.js";
-import Food from "./food.js";
+import snake from "./snake.js"
+import Food from "./food.js"
 
-let names = [
-    "Ahmed Steinke",
+function getGameState() {
+    console.log("Getting game state...");  // Add this line
+    let snake = this.mySnake[0];  // Player-controlled snake
+    
+    // Check if snake exists
+    if (!snake) {
+        console.error("Snake not found!");
+        return null;
+    }
+    
+    console.log("Snake object:", snake);  // Add this line
+    
+    let state = {
+        ssnake: snake.toJSON(),
+        food: FOOD.map(f => ({ x: f.x, y: f.y })),
+        is_dead: die,
+        score: snake.score,
+        size: snake.size,
+    };
+    
+    console.log("Generated state:", state);  // Add this line
+    return state;
+}
+
+function sendGameState() {
+    const state = getGameState();
+    console.log("Attempting to send state:", state);  // Log the state being sent
+    
+    fetch("http://localhost:5000/state", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        mode: "cors",
+        body: JSON.stringify(state)
+    })
+    .then(response => {
+        console.log("Response received:", response.status);  // Log the response status
+        return response.json();
+    })
+    .then(data => console.log("Server response:", data))
+    .catch(err => console.error("Error sending game state:", err));
+}
+let names = ["Ahmed Steinke",
     "Aubrey Brass",
     "Johanne Boothe",
     "Sunni Markland",
