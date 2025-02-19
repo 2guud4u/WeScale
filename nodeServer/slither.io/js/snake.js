@@ -85,16 +85,16 @@ class snake {
                     Math.random() * this.MaxSpeed -
                     Math.random() * this.MaxSpeed;
 
-                let minRange = Math.sqrt(game_W * game_W + game_H * game_H);
+                let minRange = Math.sqrt(this.game.game_W * this.game.game_W + this.game.game_H * this.game.game_H);
 
-                for (let i = 0; i < FOOD.length; i++) {
+                for (let i = 0; i < this.game.FOOD.length; i++) {
                     if (
-                        FOOD[i].size > this.getSize() / 10 &&
-                        this.range(this.v[0], FOOD[i]) < minRange
+                        this.game.FOOD[i].size > this.game.getSize() / 10 &&
+                        this.range(this.v[0], this.game.FOOD[i]) < minRange
                     ) {
-                        minRange = this.range(this.v[0], FOOD[i]);
-                        this.dx = FOOD[i].x - this.v[0].x;
-                        this.dy = FOOD[i].y - this.v[0].y;
+                        minRange = this.range(this.v[0], this.game.FOOD[i]);
+                        this.dx = this.game.FOOD[i].x - this.v[0].x;
+                        this.dy = this.game.FOOD[i].y - this.v[0].y;
                     }
                 }
                 if (minRange < Math.sqrt(game_W * game_W + game_H * game_H))
@@ -133,6 +133,10 @@ class snake {
                 this.v[i].x = (this.v[i].x + this.v[i - 1].x) / 2;
                 this.v[i].y = (this.v[i].y + this.v[i - 1].y) / 2;
             }
+            if(this.name == "Tifany Sugar"){
+                console.log("im moving", this.v[2])
+            }
+            
         }
         if (this.score < 200) return;
         if (this.speed == 2) this.score -= this.score / 2000;
@@ -173,6 +177,10 @@ class snake {
             (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y),
         );
     }
+
+    toString() {
+        return `snake location: ${this.x} ${this.y}`;
+      }
 }
 
 export default snake;
