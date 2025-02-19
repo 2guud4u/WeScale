@@ -1,6 +1,5 @@
 import express from "express";
 import Game from "./slither.io/js/game.js";
-import game from "./slither.io/js/game.js";
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -17,12 +16,13 @@ app.get("/", (req, res) => {
     res.send("Hello, Node.js server!");
 });
 
-app.get("/step", (req, res) => {
-    //do step stuff
-    //handle game stuff
-    let gameState = g.getState();
-    console.log(gameState);
-    res.send("");
+app.get("/step/:x/:y", (req, res) => {
+    const x = req.params.x;  // Get 'x' from the URL path
+    const y = req.params.y;  // Get 'y' from the URL path
+
+    g.update(x,y)
+    
+    res.send("snake moved"+ g.mySnake[0]["v"][0]["x"] + " score " + g.mySnake[0].score + "other snake: " + g.mySnake[2]["v"][1].x);
 });
 
 app.get("/reset", (req, res) => {

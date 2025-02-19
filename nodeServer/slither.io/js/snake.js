@@ -56,16 +56,16 @@ class snake {
                     Math.random() * this.MaxSpeed -
                     Math.random() * this.MaxSpeed;
 
-                let minRange = Math.sqrt(game_W * game_W + game_H * game_H);
+                let minRange = Math.sqrt(this.game.game_W * this.game.game_W + this.game.game_H * this.game.game_H);
 
-                for (let i = 0; i < FOOD.length; i++) {
+                for (let i = 0; i < this.game.FOOD.length; i++) {
                     if (
-                        FOOD[i].size > this.game.getSize() / 10 &&
-                        this.range(this.v[0], FOOD[i]) < minRange
+                        this.game.FOOD[i].size > this.game.getSize() / 10 &&
+                        this.range(this.v[0], this.game.FOOD[i]) < minRange
                     ) {
-                        minRange = this.range(this.v[0], FOOD[i]);
-                        this.dx = FOOD[i].x - this.v[0].x;
-                        this.dy = FOOD[i].y - this.v[0].y;
+                        minRange = this.range(this.v[0], this.game.FOOD[i]);
+                        this.dx = this.game.FOOD[i].x - this.v[0].x;
+                        this.dy = this.game.FOOD[i].y - this.v[0].y;
                     }
                 }
                 if (minRange < Math.sqrt(game_W * game_W + game_H * game_H))
@@ -104,6 +104,10 @@ class snake {
                 this.v[i].x = (this.v[i].x + this.v[i - 1].x) / 2;
                 this.v[i].y = (this.v[i].y + this.v[i - 1].y) / 2;
             }
+            if(this.name == "Tifany Sugar"){
+                console.log("im moving", this.v[2])
+            }
+            
         }
         if (this.score < 200) return;
         if (this.speed == 2) this.score -= this.score / 2000;
@@ -118,8 +122,8 @@ class snake {
         } else this.v = this.v.slice(0, N);
     }
 
-    // draw() {
-    //     this.update();
+    draw() {
+        this.update();
 
     //     for (let i = this.v.length - 1; i >= 1; i--)
     //         if (this.game.isPoint(this.v[i].x, this.v[i].y))
@@ -130,7 +134,7 @@ class snake {
     //     this.game.context.rotate(this.angle - Math.PI / 2);
     //     this.game.context.drawImage(this.sn_im, -this.size / 2, -this.size / 2, this.size, this.size);
     //     this.game.context.restore();
-    // }
+    }
 
     getAngle(a, b) {
         let c = Math.sqrt(a * a + b * b);
@@ -144,6 +148,10 @@ class snake {
             (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y),
         );
     }
+
+    toString() {
+        return `snake location: ${this.x} ${this.y}`;
+      }
 }
 
 export default snake;
