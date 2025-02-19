@@ -38,49 +38,8 @@ app.get("/step/:x/:y", (req, res) => {
 //     });
 });
 
-app.get("/reset", (req, res) => {
-    //reset game env with random
-    let game_H = 500;
-    let game_W = 500;
-    let SPEED = 1;
-    let MaxSpeed = 0;
-    let mySnake = [];
-    let FOOD = [];
-    let NFood = 2000;
-    let Nsnake = 20;
-    let sizeMap = 2000;
-    let index = 0;
-    let minScore = 200;
-    let die = false;
-
-    g = new Game(
-        game_W,
-        game_H,
-        SPEED,
-        MaxSpeed,
-        mySnake,
-        FOOD,
-        NFood,
-        Nsnake,
-        sizeMap,
-        index,
-        minScore,
-        die,
-        1
-    );
-
-// Basic route
-app.get("/", (req, res) => {
-    res.send("Hello, Node.js server!");
-});
-
-app.get("/step", (req, res) => {
-    let gameState = g.getState();
-    console.log(gameState);
-    res.send(""); // Respond with game state or an empty response
-});
-
 // app.get("/reset", (req, res) => {
+//     //reset game env with random
 //     let game_H = 500;
 //     let game_W = 500;
 //     let SPEED = 1;
@@ -109,8 +68,49 @@ app.get("/step", (req, res) => {
 //         die,
 //         1
 //     );
-//     res.send("Game after reset");
-// });
+// }
+// Basic route
+app.get("/", (req, res) => {
+    res.send("Hello, Node.js server!");
+});
+
+app.get("/step", (req, res) => {
+    let gameState = g.getState();
+    console.log(gameState);
+    res.send(""); // Respond with game state or an empty response
+});
+
+app.get("/reset", (req, res) => {
+    let game_H = 500;
+    let game_W = 500;
+    let SPEED = 1;
+    let MaxSpeed = 0;
+    let mySnake = [];
+    let FOOD = [];
+    let NFood = 2000;
+    let Nsnake = 20;
+    let sizeMap = 2000;
+    let index = 0;
+    let minScore = 200;
+    let die = false;
+
+    g = new Game(
+        game_W,
+        game_H,
+        SPEED,
+        MaxSpeed,
+        mySnake,
+        FOOD,
+        NFood,
+        Nsnake,
+        sizeMap,
+        index,
+        minScore,
+        die,
+        1
+    );
+    res.send("Game after reset");
+});
 
 app.get("/state", (req, res) => {
     //do step stuff
