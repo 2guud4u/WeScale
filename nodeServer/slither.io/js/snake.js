@@ -1,55 +1,72 @@
 import { createCanvas, loadImage } from "canvas";
 
 class snake {
-    constructor(name, game, score, x, y) {
+    constructor(name, score, x, y, game_W, game_H) {
         this.name = name;
-        this.game = game;
         this.score = score;
         this.x = x;
         this.y = y;
         this.Nball = 13;
+        this.game_W = game_W;
+        this.game_H = game_H;
+        this.v = []
 
         this.init();
+    }
+
+    getSize() {
+        var area = this.game_W * this.game_H;
+        return Math.sqrt(area / 300);
     }
 
     init() {
         this.time = Math.floor(20 + Math.random() * 100);
         this.speed = 1;
-        this.size = this.game.getSize() * 1;
+        this.size = this.getSize() * 1;
         this.angle = 0;
         this.dx = Math.random() * this.MaxSpeed - Math.random() * this.MaxSpeed;
         this.dy = Math.random() * this.MaxSpeed - Math.random() * this.MaxSpeed;
 
         this.v = [];
         for (let i = 0; i < 50; i++) this.v[i] = { x: this.x, y: this.y };
-        loadImage("public/images/head.png")
-            .then((img) => {
-                this.sn_im = img;
-                //console.log("Image loaded in Node.js!");
-            })
-            .catch((err) => console.error("Image loading error:", err));
+        // this.sn_im = new Image();
+        this.sn_im = "images/head.png";
+        // this.bd_im = new Image();
+        this.bd_im = "images/body/" + Math.floor(Math.random() * 999999) % this.Nball + ".png";
 
-        loadImage(
-            "public/images/body/" +
-                (Math.floor(Math.random() * 999999) % this.Nball) +
-                ".png",
-        )
-            .then((img) => {
-                this.sn_im = img;
-                //console.log("Image loaded in Node.js!");
-            })
-            .catch((err) => console.error("Image loading error:", err));
+
+        // loadImage("public/images/head.png")
+        //     .then((img) => {
+        //         this.sn_im = img;
+        //         //console.log("Image loaded in Node.js!");
+        //     })
+        //     .catch((err) => console.error("Image loading error:", err));
+
+        // loadImage(
+        //     "public/images/body/" +
+        //         (Math.floor(Math.random() * 999999) % this.Nball) +
+        //         ".png",
+        // )
+        //     .then((img) => {
+        //         this.bd_im = img;
+        //         //console.log("Image loaded in Node.js!");
+        //     })
+        //     .catch((err) => console.error("Image loading error:", err));
     }
 
     toJSON() {
         return {
-            snake_x: this.v[0].x,
-            snake_y: this.v[0].y,
+            x: this.x,
+            y: this.y,
+            Nball: this.Nball,
+            v: this.v,
             snake_length: this.v.length,
             score: this.score,
             size: this.size,
             speed: this.speed,
             angle: this.angle,
+            sn_im: this.sn_im,
+            bd_im: this.bd_im,
         };
     }
 
@@ -124,7 +141,7 @@ class snake {
         if (this.score < 200) return;
         if (this.speed == 2) this.score -= this.score / 2000;
         let csUp = Math.pow(this.score / 1000, 1 / 5);
-        this.size = (this.game.getSize() / 2) * csUp;
+        this.size = (this.getSize() / 2) * csUp;
         let N = 3 * Math.floor(50 * Math.pow(this.score / 1000, 1 / 1));
         if (N > this.v.length) {
             this.v[this.v.length] = {
@@ -137,15 +154,15 @@ class snake {
     draw() {
         this.update();
 
-    //     for (let i = this.v.length - 1; i >= 1; i--)
-    //         if (this.game.isPoint(this.v[i].x, this.v[i].y))
-    //             this.game.context.drawImage(this.bd_im, this.v[i].x - XX - (this.size) / 2, this.v[i].y - YY - (this.size) / 2, this.size, this.size);
+        // for (let i = this.v.length - 1; i >= 1; i--)
+        //     if (this.game.isPoint(this.v[i].x, this.v[i].y))
+        //         this.game.context.drawImage(this.bd_im, this.v[i].x - XX - (this.size) / 2, this.v[i].y - YY - (this.size) / 2, this.size, this.size);
 
-    //     this.game.context.save();
-    //     this.game.context.translate(this.v[0].x - XX, this.v[0].y - YY);
-    //     this.game.context.rotate(this.angle - Math.PI / 2);
-    //     this.game.context.drawImage(this.sn_im, -this.size / 2, -this.size / 2, this.size, this.size);
-    //     this.game.context.restore();
+        // this.game.context.save();
+        // this.game.context.translate(this.v[0].x - XX, this.v[0].y - YY);
+        // this.game.context.rotate(this.angle - Math.PI / 2);
+        // this.game.context.drawImage(this.sn_im, -this.size / 2, -this.size / 2, this.size, this.size);
+        // this.game.context.restore();
     }
 
     getAngle(a, b) {

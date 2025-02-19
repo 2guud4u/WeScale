@@ -130,19 +130,54 @@ wss.on("connection", (ws) => {
     // Send initial game state to the client
     if (g) {
         console.log("Sending game state to client");
-        ws.send(JSON.stringify(g.getState())); // Send game state as JSON
+        // ws.send(JSON.stringify(g.getContext())); // Send game state as JSON
+        ws.send(JSON.stringify([{"message": "hello"}, ])); // Send game state as JSON
     }
+
+    // Function to broadcast the game state to the current client
+    const uploadGameState = () => {
+        if (g) {
+            try {
+                // const gameState = g.getContext(); // Or g.getState() if you have fixed the circular reference
+                // ws.send(JSON.stringify(gameState));
+                ws.send(JSON.stringify(g.toJSON())); // Send game state as JSON
+                console.log("Sent game state to client");
+            } catch (err) {
+                console.error("Error sending game state:", err);
+            }
+        }
+    };
+
+    // Start sending game state at regular intervals (e.g., every 100ms)
+    const intervalId = setInterval(() => {
+        if (ws.readyState === ws.OPEN) { // Check if connection is still open
+            uploadGameState();
+            console.log("Uploaded game state");
+        }
+    }, 3000); // Interval in milliseconds (adjust based on your needs)
+
 
     // Handle game step updates or any other interaction
     ws.on("message", (message) => {
         console.log("Received: %s", message);
         // Respond to the game updates or interactions here
         // E.g., handle user input, game step updates, etc.
+
+        const data = JSON.parse(message);
+
+
+
+        if (data.type === 'canvasResize') {
+            console.log('New canvas size:', data.data.width, data.data.height);
+            // Do something with the new dimensions, if necessary
+            g.updateCanvasSize(data.data.width, data.data.height);
+        }
     });
 
     ws.on("close", () => {
         console.log("Client disconnected");
     });
+
 });
 
 // Start the server
