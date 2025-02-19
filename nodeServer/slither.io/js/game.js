@@ -435,8 +435,8 @@ class game {
 
     draw() {
         
-        for (let i = 0; i < this.Food.length; i++)
-            this.Food[i].draw();
+        // for (let i = 0; i < this.Food.length; i++)
+        //     this.Food[i].draw();
         for (let i = 0; i < this.mySnake.length; i++)
             this.mySnake[i].draw();
        

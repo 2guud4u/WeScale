@@ -3,6 +3,7 @@ import express from "express";
 import { WebSocketServer } from "ws"; // Importing WebSocketServer
 
 import Game from "./slither.io/js/game.js";
+import closedGame from "./fullGame.js";
 const app = express();
 const server = createServer(app); // Use createServer to handle both HTTP requests and WebSocket
 
@@ -21,9 +22,10 @@ app.get("/step/:x/:y", (req, res) => {
     const x = req.params.x;  // Get 'x' from the URL path
     const y = req.params.y;  // Get 'y' from the URL path
 
-    g.update(x,y)
+    g.stepGame(x,y)
     
-    res.send("snake moved"+ g.mySnake[0]["v"][0]["x"] + " score " + g.mySnake[0].score + "other snake: " + g.mySnake[2]["v"][1].x);
+    res.json(PreProcessGameState(g));
+    // res.send("snake moved"+ g.mySnake[0]["v"][0]["x"] + " score " + g.mySnake[0].score + "other snake: " + g.mySnake[2]["v"][1].x);
 // app.get("/step", (req, res) => {
 //     //do step stuff
 //     //handle game stuff
@@ -38,6 +40,14 @@ app.get("/step/:x/:y", (req, res) => {
 //     });
 });
 
+function PreProcessGameState(game){
+    let snakesData = game.mySnake.map(snake => ({ body: snake.v, size: snake.size }));
+    let foodData = game.FOOD.map(food=>({foodLoc: (food.x, food.y), size: food.size}))
+    return {
+        foodData: foodData,
+        snakesData: snakesData
+    }
+}
 // app.get("/reset", (req, res) => {
 //     //reset game env with random
 //     let game_H = 500;
@@ -81,34 +91,35 @@ app.get("/", (req, res) => {
 // });
 
 app.get("/reset", (req, res) => {
-    let game_H = 500;
-    let game_W = 500;
-    let SPEED = 1;
-    let MaxSpeed = 0;
-    let mySnake = [];
-    let FOOD = [];
-    let NFood = 2000;
-    let Nsnake = 20;
-    let sizeMap = 2000;
-    let index = 0;
-    let minScore = 200;
-    let die = false;
+    // let game_H = 500;
+    // let game_W = 500;
+    // let SPEED = 1;
+    // let MaxSpeed = 0;
+    // let mySnake = [];
+    // let FOOD = [];
+    // let NFood = 2000;
+    // let Nsnake = 20;
+    // let sizeMap = 2000;
+    // let index = 0;
+    // let minScore = 200;
+    // let die = false;
 
-    g = new Game(
-        game_W,
-        game_H,
-        SPEED,
-        MaxSpeed,
-        mySnake,
-        FOOD,
-        NFood,
-        Nsnake,
-        sizeMap,
-        index,
-        minScore,
-        die,
-        1
-    );
+    // g = new Game(
+    //     game_W,
+    //     game_H,
+    //     SPEED,
+    //     MaxSpeed,
+    //     mySnake,
+    //     FOOD,
+    //     NFood,
+    //     Nsnake,
+    //     sizeMap,
+    //     index,
+    //     minScore,
+    //     die,
+    //     1
+    // );
+    g= new closedGame()
     res.send("Game after reset");
 });
 
