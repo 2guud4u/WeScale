@@ -74,11 +74,11 @@ app.get("/", (req, res) => {
     res.send("Hello, Node.js server!");
 });
 
-app.get("/step", (req, res) => {
-    let gameState = g.getState();
-    console.log(gameState);
-    res.send(""); // Respond with game state or an empty response
-});
+// app.get("/step", (req, res) => {
+//     let gameState = g.getState();
+//     console.log(gameState);
+//     res.send(""); // Respond with game state or an empty response
+// });
 
 app.get("/reset", (req, res) => {
     let game_H = 500;
