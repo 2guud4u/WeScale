@@ -45,8 +45,8 @@ class Renderer {
             // this.game_H = this.canvas.height;
 
             // not sure what SPEED does
-            // SPEED = this.getSize() / 7;
-            // SPEED = 1;
+            SPEED = this.getSize() / 7;
+            SPEED = 1;
 
             this.gameState.MaxSpeed = this.getSize() / 7;
             if (this.gameState.mySnake.length == 0)
@@ -61,8 +61,12 @@ class Renderer {
     draw(){
         this.clearCanvas();
         console.log(this.gameState.mySnake)
-        for (let i = 0; i < this.gameState.mySnake.length; i++)
-            this.drawSnake(this.gameState.mySnake[i]);
+        console.log("snakelen: ", this.gameState.mySnake.length)
+        // for (let i = 0; i < this.gameState.mySnake; i++)
+        //     this.drawSnake(this.gameState.mySnake[i]);
+        this.gameState.mySnake.forEach(snake => {
+            this.drawSnake(snake);
+        });
         for (let i = 0; i < this.gameState.Food.length; i++)
             this.drawFood(this.gameState.Food[i]);
     }
@@ -70,20 +74,36 @@ class Renderer {
     // Draw a single snake, needs updating
     drawSnake(snake) {
         console.log("testing snake")
-        console.log(snake)
-        for (let i = snake.v.snake_length - 1; i >= 1; i--)
+        console.log(snake.snake_length - 1)
+        for (let i = snake.snake_length - 1; i >= 1; i--){
+            // console.log("snake body #", i)
             if (this.isPoint(snake.v[i].x, snake.v[i].y)){
-                const img = new Image();
-                img.src = snake.bd_im;
-                this.context.drawImage(img, snake.v[i].x - this.gameState.XX - (snake.size) / 2, snake.v[i].y - this/this.gameState.YY - (snake.size) / 2, snake.size, snake.size);
+                console.log("drawing snake body", snake.v[i].x, snake)
+                // const img = new Image();
+                // img.src = snake.bd_im;
+                // this.context.drawImage(img, snake.v[i].x - this.gameState.XX - (snake.size) / 2, snake.v[i].y - this/this.gameState.YY - (snake.size) / 2, snake.size, snake.size);
+                this.context.beginPath();
+                this.context.arc(
+                    snake.v[i].x - snake.size / 4 - this.gameState.XX,
+                    snake.v[i].y - snake.size / 4 - this.gameState.YY,
+                    20,
+                    0,
+                    Math.PI * 2,
+                    false,
+                );
+                this.context.fillStyle = "#FFFFFF";
+                this.context.fill();
+                this.context.closePath();
             }
+        }
         this.context.save();
-        this.context.translate(snake.v[0].x - this.gameState.XX, snake.v[0].y - this.gameState.YY);
-        this.context.rotate(snake.angle - Math.PI / 2);
-        const head = new Image();
-        head.src = snake.sn_im;
-        this.context.drawImage(head, -this.size / 2, -this.size / 2, this.size, this.size);
-        this.context.restore();
+        // this.context.translate(snake.v[0].x - this.gameState.XX, snake.v[0].y - this.gameState.YY);
+        // this.context.rotate(snake.angle - Math.PI / 2);
+        // const head = new Image();
+        // head.src = snake.sn_im;
+        // this.context.drawImage(head, -this.size / 2, -this.size / 2, this.size, this.size);
+        // this.context.restore();
+        console.log("done drawing snake")
     }
 
     // Draw food (if the game has it)
