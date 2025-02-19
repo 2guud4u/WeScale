@@ -151,6 +151,7 @@ wss.on("connection", (ws) => {
             try {
                 // const gameState = g.getContext(); // Or g.getState() if you have fixed the circular reference
                 // ws.send(JSON.stringify(gameState));
+                console.log(g.name);
                 ws.send(JSON.stringify(g.toJSON())); // Send game state as JSON
                 console.log("Sent game state to client");
             } catch (err) {
@@ -165,7 +166,7 @@ wss.on("connection", (ws) => {
             uploadGameState();
             console.log("Uploaded game state");
         }
-    }, 3000); // Interval in milliseconds (adjust based on your needs)
+    }, 50); // Interval in milliseconds (adjust based on your needs)
 
 
     // Handle game step updates or any other interaction

@@ -22,6 +22,15 @@ class food {
             // this.game.context.closePath()
         }
     }
+
+    toJSON() {
+        return {
+            size: this.size,
+            x: this.x,
+            y: this.y,
+            color: this.color,
+        };
+    }
 }
 
 class snake {
@@ -138,10 +147,27 @@ class snake {
     range(v1, v2) {
         return Math.sqrt((v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y));
     }
+
+    toJSON() {
+        return {
+            x: this.x,
+            y: this.y,
+            Nball: this.Nball,
+            v: this.v,
+            snake_length: this.v.length,
+            score: this.score,
+            size: this.size,
+            speed: this.speed,
+            angle: this.angle,
+            sn_im: this.sn_im,
+            bd_im: this.bd_im,
+        };
+    }
 }
 
     class Game {
         constructor() {
+            this.name = "HaiZuka";
             this.game_W = 698;
             this.game_H = 788;
             // this.bg_im = new Image();
@@ -390,6 +416,39 @@ class snake {
                 y - this.YY < -3 * this.getSize() ||
                 x - this.XX > this.game_W + 3 * this.getSize() ||
                 y - this.YY > this.game_H + 3 * this.getSize());
+        }
+
+        updateCanvasSize(width, height) {
+            this.game_H = height;
+            this.game_W = width;
+    
+            for (let i = 0; i < this.Nsnake; i++) {
+                this.mySnake[i].game_H = height;
+                this.mySnake[i].game_W = width;
+            }
+            console.log("Canvas size updated to", width, "x", height);
+        }
+
+        toJSON() {
+            return {
+                game_W: this.game_W,
+                game_H: this.game_H,
+                speed: this.speed,
+                MaxSpeed: this.MaxSpeed,
+                mySnake: this.mySnake.map((snake) => snake.toJSON()), // Serialize snake objects
+                Food: this.FOOD.map((food) => food.toJSON()), // Serialize food objects
+                NFood: this.NFood,
+                Nsnake: this.Nsnake,
+                sizeMap: this.sizeMap,
+                index: this.index,
+                minScore: this.minScore,
+                die: this.die,
+                XX: this.XX,
+                YY: this.YY,
+                Xfocus: this.Xfocus,
+                Yfocus: this.Yfocus,
+    
+            };
         }
     }
 
