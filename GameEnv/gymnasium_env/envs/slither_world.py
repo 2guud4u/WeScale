@@ -67,7 +67,8 @@ class SlitherWorldEnv(gym.Env):
         # })
 
         # We have 8 actions, corresponding to "right", "up", "left", "down", "up-right", "up-left", "down-right", "down-left"
-        self.action_space = spaces.Box(low=np.array([-1000, -1000]), high=np.array([1000, 1000]), dtype=np.int32)
+        # self.action_space = spaces.Box(low=np.array([-1000, -1000]), high=np.array([1000, 1000]), dtype=np.int32)
+        self.action_space = spaces.MultiDiscrete([2001, 2001])  # Values will be in [0, 2000]
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -136,7 +137,9 @@ class SlitherWorldEnv(gym.Env):
         return observation, info
 
     def step(self, action):
-        x, y = action.astype(int)
+        action = action - 1000
+        
+        x, y = action
 
         stepUrl = baseUrl+"/step" + f"/{x}" + f"/{y}"
         reqString = sendGetRequest(stepUrl)
