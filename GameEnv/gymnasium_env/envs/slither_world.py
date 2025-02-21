@@ -138,9 +138,7 @@ class SlitherWorldEnv(gym.Env):
 
     def step(self, action):
         action = action - 1000
-        
         x, y = action
-
         stepUrl = baseUrl+"/step" + f"/{x}" + f"/{y}"
         reqString = sendGetRequest(stepUrl)
         reqDict = json.loads(reqString)

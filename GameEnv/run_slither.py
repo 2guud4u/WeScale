@@ -32,7 +32,7 @@ model = PPO(
 # Train the agent
 model.learn(total_timesteps=int(2e5))
 
-model_name = "ppo-snake-v2"
+model_name = "ppo-snake-v1"
 model.save(model_name)
 
 eval_env = Monitor(gymnasium.make("gymnasium_env/slither_world"))
