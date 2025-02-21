@@ -57,7 +57,7 @@
             }
 
             // Initialize the renderer
-            const renderer = new Renderer(canvas, ctx, bg_im);
+            const renderer = new Renderer(canvas, ctx, bg_im, document);
 
             // Call the resize function initially
             renderer.resizeCanvas();
@@ -84,14 +84,14 @@
                 // Parse the incoming message (assuming it's JSON)
                 const gameState = JSON.parse(event.data);
 
-                console.log("Rendering...");
-                // console.log(gameState);
+            // console.log("Rendering...");
+            // console.log(gameState);
 
-                // Render the game state
-                renderer.updateState(gameState);
-                renderer.render();
-                renderer.draw();
-                console.log("Rendered!");
+            // Render the game state
+            renderer.updateState(gameState);
+            renderer.render();
+            renderer.draw();
+            // console.log("Rendered!");
             });
 
             // Handle connection close

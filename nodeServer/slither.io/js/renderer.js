@@ -1,9 +1,11 @@
 class Renderer {
-    constructor(canvas, ctx, bg_im) {
+    constructor(canvas, ctx, bg_im, document) {
         this.canvas = canvas;
         this.context = ctx;
         this.gameState = null;
         this.bg_im = bg_im;
+        this.document = document;
+
 
         // Set initial canvas size
         this.resizeCanvas();
@@ -11,9 +13,13 @@ class Renderer {
         // Adjust canvas size when the window is resized
         window.addEventListener("resize", () => this.resizeCanvas());
         this.init();
+        this.listenMouse();
+        this.listenTouch();
+
     }
 
-    init() {}
+    init() {
+    }
 
     // Resize canvas to fit the viewport
     resizeCanvas() {
@@ -76,8 +82,8 @@ class Renderer {
 
     draw() {
         this.clearCanvas();
-        console.log(this.gameState.mySnake);
-        console.log("snakelen: ", this.gameState.mySnake.length);
+        // console.log(this.gameState.mySnake)
+        // console.log("snakelen: ", this.gameState.mySnake.length)
         // for (let i = 0; i < this.gameState.mySnake; i++)
         //     this.drawSnake(this.gameState.mySnake[i]);
         this.gameState.mySnake.forEach((snake) => {
@@ -89,12 +95,12 @@ class Renderer {
 
     // Draw a single snake, needs updating
     drawSnake(snake) {
-        console.log("testing snake");
-        console.log(snake.snake_length - 1);
-        for (let i = snake.snake_length - 1; i >= 1; i--) {
+        // console.log("testing snake")
+        // console.log(snake.snake_length - 1)
+        for (let i = snake.snake_length - 1; i >= 1; i--){
             // console.log("snake body #", i)
-            if (this.isPoint(snake.v[i].x, snake.v[i].y)) {
-                console.log("drawing snake body", snake.v[i].x, snake);
+            if (this.isPoint(snake.v[i].x, snake.v[i].y)){
+                // console.log("drawing snake body", snake.v[i].x, snake)
                 // const img = new Image();
                 // img.src = snake.bd_im;
                 // this.context.drawImage(img, snake.v[i].x - this.gameState.XX - (snake.size) / 2, snake.v[i].y - this/this.gameState.YY - (snake.size) / 2, snake.size, snake.size);
@@ -119,7 +125,7 @@ class Renderer {
         // head.src = snake.sn_im;
         // this.context.drawImage(head, -this.size / 2, -this.size / 2, this.size, this.size);
         // this.context.restore();
-        console.log("done drawing snake");
+        // console.log("done drawing snake")
     }
 
     // Draw food (if the game has it)
@@ -154,6 +160,75 @@ class Renderer {
             return false;
         return true;
     }
+
+    listenTouch() {
+        this.document.addEventListener("touchmove", evt => {
+            console.log("touchmove")
+            // var y = evt.touches[0].pageY;
+            // var x = evt.touches[0].pageX;
+            // this.chX = (x - this.game_W / 2) / 15;
+            // this.chY = (y - this.game_H / 2) / 15;
+        })
+        this.document.addEventListener("touchstart", evt => {
+            console.log("touchstart")
+            // var y = evt.touches[0].pageY;
+            // var x = evt.touches[0].pageX;
+            // this.chX = (x - this.game_W / 2) / 15;
+            // this.chY = (y - this.game_H / 2) / 15;
+            // this.mySnake[0].speed = 2;
+        })
+        this.document.addEventListener("touchend", evt => {
+            console.log("touchend")
+            // this.mySnake[0].speed = 1;
+        })
+    }
+
+    listenMouse() {
+        this.document.addEventListener("mousedown", evt => {
+            console.log("mousedown")
+            var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
+            var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
+            console.log(x, y)
+            // this.mySnake[0].speed = 2;
+        })
+        this.document.addEventListener("mousemove", evt => {
+            console.log("mousemove")
+            var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
+            var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
+            console.log(x, y)
+            this.drawScore();
+            // this.chX = (x - this.game_W / 2) / 15;
+            // this.chY = (y - this.game_H / 2) / 15;
+        })
+       this.document.addEventListener("mouseup", evt => {
+            console.log("mouseup")
+            var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
+            var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
+            console.log(x, y)
+            // this.mySnake[0].speed = 1;
+        })
+    }
+
+    
+    drawScore() {
+        this.context.font = this.getSize() / 4 + 'px Arial Black';
+        for (let i = 0; i < 10; i++) {
+            this.context.fillStyle = "#AA0000";
+            // if (i == index)
+                // this.context.fillStyle = "#CC99FF";
+            this.context.fillText("#" + (i + 1), 3 * this.game_W / 4, this.getSize() / 2 * (i + 1));
+            this.context.fillText("HELLO", 3 * this.game_W / 4 + this.game_W / 24, this.getSize() / 2 * (i + 1));
+            // this.context.fillText(Math.floor(data[i].score), 3 * this.game_W / 4 + this.game_W / 5.5, this.getSize() / 2 * (i + 1));
+        }
+        // if (index > 9) {
+        //     this.context.fillStyle = "#CC99FF";
+        //     this.context.fillText("#" + (index + 1), 3 * this.game_W / 4, this.getSize() / 2 * (10 + 1));
+        //     this.context.fillText(data[index].name, 3 * this.game_W / 4 + this.game_W / 24, this.getSize() / 2 * (10 + 1));
+        //     this.context.fillText(Math.floor(data[index].score), 3 * this.game_W / 4 + this.game_W / 5.5, this.getSize() / 2 * (10 + 1));
+        // }
+    }
+
+    
 }
 
 export default Renderer;
