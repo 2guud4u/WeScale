@@ -18,3 +18,4 @@ To run the game local use run:
 ```
 run learning
 cd WeScale/GameEnv/run_slither.py
+

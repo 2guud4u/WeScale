@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 app.get("/step/:x/:y", (req, res) => {
     const x = req.params.x; // Get 'x' from the URL path
     const y = req.params.y; // Get 'y' from the URL path
-    // console.log("recieved", x, y)
+    console.log("recieved", x, y)
     g.stepGame(x, y);
 
     res.json(PreProcessGameState(g));
