@@ -7,6 +7,8 @@ import requests
 
 baseUrl = "http://localhost:3000"  # Change port if needed
 
+FOOD_AMOUNT = 200
+BODY_AMOUNT = 100
 
 def sendGetRequest(url):
     try:
@@ -53,8 +55,8 @@ class SlitherWorldEnv(gym.Env):
             #     snake_dict_space
             # ),
             'mySnake': spaces.Box(low=-10000, high=10000, shape=(2,), dtype=np.float32),
-            'mySnakeBody': spaces.Box(low=-10000, high=10000, shape=(200,), dtype=np.float32),
-            'foodList': spaces.Box(low=-10000, high=10000, shape=(300,), dtype=np.float32)
+            'mySnakeBody': spaces.Box(low=-10000, high=10000, shape=(BODY_AMOUNT*2,), dtype=np.float32),
+            'foodList': spaces.Box(low=-10000, high=10000, shape=(FOOD_AMOUNT*3,), dtype=np.float32)
           
             })
             
@@ -77,20 +79,14 @@ class SlitherWorldEnv(gym.Env):
         }
     def createObs(self,data):
         obs = dict()
-        # obs["mySnake"] = dict()
-        # obs["mySnake"] = {
-        #     "size": np.int64(data["mySnake"]["size"]),
-        #     "score": np.int64(data["mySnake"]["score"]),
-        #     "name": data["mySnake"]["name"],
-        #     "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in data["mySnake"]["body"]])
-        #     }
+
         mySnakeBody = [np.array([loc['x'], loc['y']], dtype=np.float32) for loc in data["mySnake"]["body"]]
         obs["mySnakeBody"] = np.array(mySnakeBody, dtype=np.float32).flatten()
         #padding
-        if len(obs["mySnakeBody"]) < 200:
-            obs["mySnakeBody"] = np.pad(obs["mySnakeBody"], (0, 200-len(obs["mySnakeBody"])), 'constant')
-        elif len(obs["mySnakeBody"]) > 200:
-            obs["mySnakeBody"] = obs["mySnakeBody"][:200]
+        if len(obs["mySnakeBody"]) < BODY_AMOUNT*2:
+            obs["mySnakeBody"] = np.pad(obs["mySnakeBody"], (0, BODY_AMOUNT*2-len(obs["mySnakeBody"])), 'constant')
+        elif len(obs["mySnakeBody"]) > BODY_AMOUNT*2:
+            obs["mySnakeBody"] = obs["mySnakeBody"][:BODY_AMOUNT*2]
 
         obs["mySnake"] = np.array([data["mySnake"]["size"], data["mySnake"]["score"]], dtype=np.float32)
         # obs["otherSnakes"] = tuple([{
@@ -100,8 +96,13 @@ class SlitherWorldEnv(gym.Env):
         #     "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in snake["body"]])
         #     } for snake in data["otherSnakesList"]])
         
-        foods = [[food["foodLoc"][0], food["foodLoc"][1], food["size"]] for food in data["foodList"][:100]]
+        foods = [[food["foodLoc"][0], food["foodLoc"][1], food["size"]] for food in data["foodList"][:FOOD_AMOUNT*3]]
         obs["foodList"] = np.array(foods, dtype=np.float32).flatten()
+        #padding
+        if len(obs["foodList"]) < FOOD_AMOUNT*3:
+            obs["foodList"] = np.pad(obs["foodList"], (0, FOOD_AMOUNT*3-len(obs["foodList"])), 'constant')
+        elif len(obs["foodList"]) > FOOD_AMOUNT*3:
+            obs["foodList"] = obs["foodList"][:FOOD_AMOUNT*3]
 
         return obs
     

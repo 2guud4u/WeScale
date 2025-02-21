@@ -249,13 +249,11 @@ class Game {
     }
 
     init() {
-        // this.canvas = document.createElement("canvas");
-        // this.context = this.canvas.getContext("2d");
-        // document.body.appendChild(this.canvas);
+
         this.render();
         this.die = false;
         for (let i = 0; i < this.Nsnake; i++) {
-            console.log("making mysnake", i);
+            
             this.mySnake[i] = new snake(
                 this.names[Math.floor(Math.random() * this.names.length)],
                 this,

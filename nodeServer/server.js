@@ -4,6 +4,7 @@ import { WebSocketServer } from "ws"; // Importing WebSocketServer
 
 import Game from "./slither.io/js/game.js";
 import closedGame from "./fullGame.js";
+import food from "./slither.io/js/food.js";
 const app = express();
 const server = createServer(app); // Use createServer to handle both HTTP requests and WebSocket
 
@@ -20,24 +21,28 @@ app.get("/", (req, res) => {
 app.get("/step/:x/:y", (req, res) => {
     const x = req.params.x; // Get 'x' from the URL path
     const y = req.params.y; // Get 'y' from the URL path
-    console.log("recieved", x, y)
+    // console.log("recieved", x, y)
     g.stepGame(x, y);
 
     res.json(PreProcessGameState(g));
-    // res.send("snake moved"+ g.mySnake[0]["v"][0]["x"] + " score " + g.mySnake[0].score + "other snake: " + g.mySnake[2]["v"][1].x);
-    // app.get("/step", (req, res) => {
-    //     //do step stuff
-    //     //handle game stuff
-    //     let gameState = g.getState(); //assuming this returns game state
-    //     console.log(gameState);
 
-    //     res.json({
-    //         snake: gameState.snake,  //adjust based on actual data
-    //         food: gameState.food,
-    //         score: gameState.score,
-    //         alive: gameState.alive
-    //     });
 });
+function getFoodWithinRadius(snake, foodList, amount, radius) {
+    let foodWithinRadius = [];
+    for (let i = 0; i < foodList.length; i++) {
+        let food = foodList[i];
+        let distance = Math.sqrt(
+            Math.pow(snake["body"][0]["x"] - food.x, 2) +
+            Math.pow(snake["body"][0]["y"] - food.y, 2)
+        );
+       
+        if (distance < radius) {
+            foodWithinRadius.push(food);
+        }
+    }
+    return foodWithinRadius.slice(0, amount);
+}
+
 
 function PreProcessGameState(game) {
     let snakesData = game.mySnake.map((snake) => ({
@@ -46,7 +51,7 @@ function PreProcessGameState(game) {
         score: snake.score,
         name: snake.name,
     }));
-    let foodData = game.FOOD.map((food) => ({
+    let foodData = getFoodWithinRadius(snakesData[0],game.FOOD, 200, 500).map((food) => ({
         foodLoc: [food.x, food.y],
         size: food.size,
     }));
@@ -103,6 +108,7 @@ app.get("/", (req, res) => {
 
 app.get("/reset", (req, res) => {
     g = new closedGame();
+    console.log('reset')
     res.json(PreProcessGameState(g));
 });
 
