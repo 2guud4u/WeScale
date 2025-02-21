@@ -93,6 +93,22 @@ class Renderer {
             this.drawFood(this.gameState.Food[i]);
     }
 
+    visualizeMouse(mouseState){
+        this.context.beginPath();
+        this.context.arc(
+            mouseState.x,
+            mouseState.y,
+            20,
+            0,
+            Math.PI * 2,
+            false,
+        );
+        this.context.fillStyle = "#FFFFFF";
+        this.context.fill();
+        this.context.closePath
+
+    }
+
     // Draw a single snake, needs updating
     drawSnake(snake) {
         // console.log("testing snake")
@@ -188,14 +204,14 @@ class Renderer {
             console.log("mousedown")
             var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
             var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
-            console.log(x, y)
+            // console.log(x, y)
             // this.mySnake[0].speed = 2;
         })
         this.document.addEventListener("mousemove", evt => {
             console.log("mousemove")
             var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
             var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
-            console.log(x, y)
+            // console.log(x, y)
             this.drawScore();
             // this.chX = (x - this.game_W / 2) / 15;
             // this.chY = (y - this.game_H / 2) / 15;
@@ -204,7 +220,7 @@ class Renderer {
             console.log("mouseup")
             var x = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
             var y = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
-            console.log(x, y)
+            // console.log(x, y)
             // this.mySnake[0].speed = 1;
         })
     }

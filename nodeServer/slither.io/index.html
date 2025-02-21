@@ -82,16 +82,25 @@
             // Handle receiving game state from the server
             socket.addEventListener("message", (event) => {
                 // Parse the incoming message (assuming it's JSON)
-                const gameState = JSON.parse(event.data);
+                const message = JSON.parse(event.data);
 
-            // console.log("Rendering...");
-            // console.log(gameState);
-
-            // Render the game state
-            renderer.updateState(gameState);
-            renderer.render();
-            renderer.draw();
-            // console.log("Rendered!");
+                // console.log("Rendering...");
+                // console.log(gameState);
+                if (message["type"] == "gameState") {
+                    const gameState = message["data"];
+                    // Render the game state
+                    renderer.updateState(gameState);
+                    renderer.render();
+                    renderer.draw();
+                    // console.log("Rendered!");
+                } else if (message["type"] == "mouseState") {
+                    console.log("Unknown message type:", message["type"]);
+                    renderer.visualizeMouse(message["data"]);
+                }else{
+                    console.log("Unknown message type:", message["type"]);
+                    console.error("message:", message);
+                }
+            
             });
 
             // Handle connection close

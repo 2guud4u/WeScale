@@ -4,6 +4,7 @@ import { WebSocketServer } from "ws"; // Importing WebSocketServer
 
 import Game from "./slither.io/js/game.js";
 import closedGame from "./fullGame.js";
+import { type } from "os";
 const app = express();
 const server = createServer(app); // Use createServer to handle both HTTP requests and WebSocket
 
@@ -11,6 +12,8 @@ const wss = new WebSocketServer({ server }); // Create WebSocket server attached
 
 const PORT = process.env.PORT || 3000;
 let g = null;
+
+let mouse = null;
 
 // Basic route
 app.get("/", (req, res) => {
@@ -22,6 +25,8 @@ app.get("/step/:x/:y", (req, res) => {
     const y = req.params.y; // Get 'y' from the URL path
     console.log("recieved", x, y)
     g.stepGame(x, y);
+    mouse = {x, y};
+    
 
     res.json(PreProcessGameState(g));
     // res.send("snake moved"+ g.mySnake[0]["v"][0]["x"] + " score " + g.mySnake[0].score + "other snake: " + g.mySnake[2]["v"][1].x);
@@ -135,7 +140,12 @@ wss.on("connection", (ws) => {
                 // const gameState = g.getContext(); // Or g.getState() if you have fixed the circular reference
                 // ws.send(JSON.stringify(gameState));
                 console.log(g.name);
-                ws.send(JSON.stringify(g.toJSON())); // Send game state as JSON
+                ws.send(JSON.stringify(
+                    {type: "gameState",  
+                        data: g.toJSON()
+                    }
+                
+                )); // Send game state as JSON
                 console.log("Sent game state to client");
             } catch (err) {
                 console.error("Error sending game state:", err);
@@ -149,6 +159,14 @@ wss.on("connection", (ws) => {
             // Check if connection is still open
             uploadGameState();
             console.log("Uploaded game state");
+            if (mouse){
+                ws.send(JSON.stringify(
+                    {type: "mouseState",  data: mouse}
+                
+                ));
+                console.log("Uploaded mouse state");
+                mouse = null;
+            }
         }
     }, 50); // Interval in milliseconds (adjust based on your needs)
 
