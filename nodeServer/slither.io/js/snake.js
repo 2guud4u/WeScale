@@ -9,7 +9,7 @@ class snake {
         this.Nball = 13;
         this.game_W = game_W;
         this.game_H = game_H;
-        this.v = []
+        this.v = [];
 
         this.init();
     }
@@ -32,8 +32,10 @@ class snake {
         // this.sn_im = new Image();
         this.sn_im = "images/head.png";
         // this.bd_im = new Image();
-        this.bd_im = "images/body/" + Math.floor(Math.random() * 999999) % this.Nball + ".png";
-
+        this.bd_im =
+            "images/body/" +
+            (Math.floor(Math.random() * 999999) % this.Nball) +
+            ".png";
 
         // loadImage("public/images/head.png")
         //     .then((img) => {
@@ -85,7 +87,10 @@ class snake {
                     Math.random() * this.MaxSpeed -
                     Math.random() * this.MaxSpeed;
 
-                let minRange = Math.sqrt(this.game.game_W * this.game.game_W + this.game.game_H * this.game.game_H);
+                let minRange = Math.sqrt(
+                    this.game.game_W * this.game.game_W +
+                        this.game.game_H * this.game.game_H,
+                );
 
                 for (let i = 0; i < this.game.FOOD.length; i++) {
                     if (
@@ -133,10 +138,9 @@ class snake {
                 this.v[i].x = (this.v[i].x + this.v[i - 1].x) / 2;
                 this.v[i].y = (this.v[i].y + this.v[i - 1].y) / 2;
             }
-            if(this.name == "Tifany Sugar"){
-                console.log("im moving", this.v[2])
+            if (this.name == "Tifany Sugar") {
+                console.log("im moving", this.v[2]);
             }
-            
         }
         if (this.score < 200) return;
         if (this.speed == 2) this.score -= this.score / 2000;
@@ -180,7 +184,7 @@ class snake {
 
     toString() {
         return `snake location: ${this.x} ${this.y}`;
-      }
+    }
 }
 
 export default snake;

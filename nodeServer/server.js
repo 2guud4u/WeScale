@@ -12,44 +12,52 @@ const wss = new WebSocketServer({ server }); // Create WebSocket server attached
 const PORT = process.env.PORT || 3000;
 let g = null;
 
-
 // Basic route
 app.get("/", (req, res) => {
     res.send("Hello, Node.js server!");
 });
 
 app.get("/step/:x/:y", (req, res) => {
-    const x = req.params.x;  // Get 'x' from the URL path
-    const y = req.params.y;  // Get 'y' from the URL path
+    const x = req.params.x; // Get 'x' from the URL path
+    const y = req.params.y; // Get 'y' from the URL path
 
-    g.stepGame(x,y)
-    
+    g.stepGame(x, y);
+
     res.json(PreProcessGameState(g));
     // res.send("snake moved"+ g.mySnake[0]["v"][0]["x"] + " score " + g.mySnake[0].score + "other snake: " + g.mySnake[2]["v"][1].x);
-// app.get("/step", (req, res) => {
-//     //do step stuff
-//     //handle game stuff
-//     let gameState = g.getState(); //assuming this returns game state
-//     console.log(gameState);
-    
-//     res.json({
-//         snake: gameState.snake,  //adjust based on actual data
-//         food: gameState.food,
-//         score: gameState.score,
-//         alive: gameState.alive
-//     });
+    // app.get("/step", (req, res) => {
+    //     //do step stuff
+    //     //handle game stuff
+    //     let gameState = g.getState(); //assuming this returns game state
+    //     console.log(gameState);
+
+    //     res.json({
+    //         snake: gameState.snake,  //adjust based on actual data
+    //         food: gameState.food,
+    //         score: gameState.score,
+    //         alive: gameState.alive
+    //     });
 });
 
-function PreProcessGameState(game){
-    let snakesData = game.mySnake.map(snake => ({ body: snake.v, size: snake.size, score: snake.score, name:  snake.name}));
-    let foodData = game.FOOD.map(food=>({foodLoc: (food.x, food.y), size: food.size}));
-    let dieData = game.die
+function PreProcessGameState(game) {
+    let snakesData = game.mySnake.map((snake) => ({
+        body: snake.v,
+        size: snake.size,
+        score: snake.score,
+        name: snake.name,
+    }));
+    let foodData = game.FOOD.map((food) => ({
+        foodLoc: [food.x, food.y],
+        size: food.size,
+    }));
+    let dieData = game.die;
+    
     return {
         foodList: foodData,
         otherSnakesList: snakesData.slice(1),
-        mySnake:  snakesData[0],
-        dieBool: dieData
-    }
+        mySnake: snakesData[0],
+        dieBool: dieData,
+    };
 }
 // app.get("/reset", (req, res) => {
 //     //reset game env with random
@@ -94,43 +102,15 @@ app.get("/", (req, res) => {
 // });
 
 app.get("/reset", (req, res) => {
-    // let game_H = 500;
-    // let game_W = 500;
-    // let SPEED = 1;
-    // let MaxSpeed = 0;
-    // let mySnake = [];
-    // let FOOD = [];
-    // let NFood = 2000;
-    // let Nsnake = 20;
-    // let sizeMap = 2000;
-    // let index = 0;
-    // let minScore = 200;
-    // let die = false;
-
-    // g = new Game(
-    //     game_W,
-    //     game_H,
-    //     SPEED,
-    //     MaxSpeed,
-    //     mySnake,
-    //     FOOD,
-    //     NFood,
-    //     Nsnake,
-    //     sizeMap,
-    //     index,
-    //     minScore,
-    //     die,
-    //     1
-    // );
-    g= new closedGame()
-    res.send("Game created again");
+    g = new closedGame();
+    res.json(PreProcessGameState(g));
 });
 
 app.get("/state", (req, res) => {
     //do step stuff
     //handle game stuff
-    let gameState = g.getState();
-    if (!gameState) {
+
+    if (!g) {
         res.status(500).json({ error: "Failed to get game state" });
     } else {
         res.json(PreProcessGameState(g));
@@ -140,12 +120,12 @@ app.get("/state", (req, res) => {
 // WebSocket connection handler
 wss.on("connection", (ws) => {
     console.log("New client connected");
-    
+
     // Send initial game state to the client
     if (g) {
         console.log("Sending game state to client");
         // ws.send(JSON.stringify(g.getContext())); // Send game state as JSON
-        ws.send(JSON.stringify([{"message": "hello"}, ])); // Send game state as JSON
+        ws.send(JSON.stringify([{ message: "hello" }])); // Send game state as JSON
     }
 
     // Function to broadcast the game state to the current client
@@ -165,12 +145,12 @@ wss.on("connection", (ws) => {
 
     // Start sending game state at regular intervals (e.g., every 100ms)
     const intervalId = setInterval(() => {
-        if (ws.readyState === ws.OPEN) { // Check if connection is still open
+        if (ws.readyState === ws.OPEN) {
+            // Check if connection is still open
             uploadGameState();
             console.log("Uploaded game state");
         }
     }, 50); // Interval in milliseconds (adjust based on your needs)
-
 
     // Handle game step updates or any other interaction
     ws.on("message", (message) => {
@@ -180,10 +160,8 @@ wss.on("connection", (ws) => {
 
         const data = JSON.parse(message);
 
-
-
-        if (data.type === 'canvasResize') {
-            console.log('New canvas size:', data.data.width, data.data.height);
+        if (data.type === "canvasResize") {
+            console.log("New canvas size:", data.data.width, data.data.height);
             // Do something with the new dimensions, if necessary
             g.updateCanvasSize(data.data.width, data.data.height);
         }
@@ -192,7 +170,6 @@ wss.on("connection", (ws) => {
     ws.on("close", () => {
         console.log("Client disconnected");
     });
-
 });
 
 // Start the server

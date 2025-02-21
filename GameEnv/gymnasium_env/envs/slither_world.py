@@ -15,13 +15,6 @@ def sendGetRequest(url):
     except:
         print(response)
         return
-    
-
-GameConfig = {
-    "game_H": 1000,
-    "game_W": 1000,
-    "NSnake": 20,
-}
 rewards = {
     "die": -100,
     "food": 1,
@@ -32,17 +25,25 @@ rewards = {
     "away-food": -0.05
 }
 
-class Actions(Enum):
-    right = 0
-    up_right = 1
-    up = 2
-    up_left = 3
-    left = 4
-    down_left = 5
-    down = 6
-    down_right = 7
 
-class GridWorldEnv(gym.Env):
+snake_dict_space = spaces.Dict({
+    'body': spaces.Sequence(spaces.Box(
+        low=-float('inf'),
+        high=float('inf'),
+        shape=(2,),
+        
+    )),
+    'size': spaces.Discrete(1000),
+    'score': spaces.Discrete(1000000),
+    'name': spaces.Text(max_length=100)
+})
+food_dict_space = spaces.Dict({
+    "foodLoc": spaces.Box(low=-10000, high=10000, shape=(2,), dtype=np.float32),
+    "size": spaces.Discrete(1000)
+})
+
+
+class SlitherWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
     def __init__(self, render_mode=None, size=5):
@@ -52,12 +53,18 @@ class GridWorldEnv(gym.Env):
         # Observations are dictionaries with the agent's and the target's location.
         # Each location is encoded as an element of {0, ..., `size`}^2,
         # i.e. MultiDiscrete([size, size]).
-        self.observation_space = spaces.Dict(
-            {
-                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-                "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-            }
-        )
+        self.observation_space = spaces.Dict({
+            'mySnake': snake_dict_space,
+            'otherSnakes': spaces.Sequence(
+                snake_dict_space
+            ),
+            'foodList': spaces.Sequence(
+                food_dict_space
+            ),
+          
+            })
+            
+        # })
 
         # We have 8 actions, corresponding to "right", "up", "left", "down", "up-right", "up-left", "down-right", "down-left"
         self.action_space = spaces.Box(low=np.array([-1000, -1000]), high=np.array([1000, 1000]), dtype=np.int32)
@@ -67,16 +74,6 @@ class GridWorldEnv(gym.Env):
         the direction we will walk in if that action is taken.
         i.e. 0 corresponds to "right", 1 to "up" etc.
         """
-        self._action_to_direction = {
-            Actions.right.value: np.array([1, 0]),
-            Actions.up_right.value: np.array([1, 1]),
-            Actions.up.value: np.array([0, 1]),
-            Actions.up_left.value: np.array([-1, 1]),
-            Actions.left.value: np.array([-1, 0]),
-            Actions.down_left.value: np.array([-1, -1]),
-            Actions.down.value: np.array([0, -1]),
-            Actions.down_right.value: np.array([1, -1]),
-        }
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -98,29 +95,50 @@ class GridWorldEnv(gym.Env):
         return {
 
         }
+    def createObs(self,data):
+        obs = dict()
+        obs["mySnake"] = dict()
+        obs["mySnake"] = {
+            "size": np.int64(data["mySnake"]["size"]),
+            "score": np.int64(data["mySnake"]["score"]),
+            "name": data["mySnake"]["name"],
+            "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in data["mySnake"]["body"]])
+            }
+        
+        obs["otherSnakes"] = tuple([{
+            "size": int(snake["size"]),
+            "score": int(snake["score"]),
+            "name": snake["name"],
+            "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in snake["body"]])
+            } for snake in data["otherSnakesList"]])
+        
+        obs["foodList"] = tuple([{
+            "foodLoc": np.array([food["foodLoc"][0], food["foodLoc"][1]], dtype=np.float32),
+             "size": np.int64(food["size"]),
+        } for food in data["foodList"][:5]])
 
+        return obs
+    
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
-        
-        observation = {}
-        reward = 0
-        terminated = False
+        observation = dict()
+        stateUrl = baseUrl+"/reset"
+        reqString = sendGetRequest(stateUrl)
+        reqDict = json.loads(reqString)
+        observation = self.createObs(reqDict)
         info = {}
-
         return observation, info
 
     def step(self, action):
-        x, y = action
+        x, y = action.astype(int)
 
         stepUrl = baseUrl+"/step" + f"/{x}" + f"/{y}"
         reqString = sendGetRequest(stepUrl)
         reqDict = json.loads(reqString)
-
-
-        observation = {}
-        reward = reqDict.mySnake["score"]
-        terminated = reqDict["die"]
+        observation = self.createObs(reqDict)
+        reward = reqDict["mySnake"]["score"]
+        terminated = reqDict["dieBool"]
         info = {}
         return observation, reward, terminated, False, info
 
@@ -136,6 +154,6 @@ class GridWorldEnv(gym.Env):
         return 
 
 if __name__ == "__main__":
-    reqString= sendGetRequest("http://localhost:3000/step/1/1")
+    reqString= sendGetRequest("http://localhost:3000/state")
     reqDict = json.loads(reqString)
-    print(reqDict["mySnake"])
+    print(reqDict["mySnake"]["score"])
