@@ -251,6 +251,7 @@ class Game {
     init() {
 
         this.render();
+        this.stepCount = 0
         this.die = false;
         for (let i = 0; i < this.Nsnake; i++) {
             
@@ -330,6 +331,7 @@ class Game {
         this.chY = (y - this.game_H / 2) / 15;
         this.update();
         this.draw();
+        this.stepCount+=1
     }
 
     update() {

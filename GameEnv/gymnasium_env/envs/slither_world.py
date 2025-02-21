@@ -18,6 +18,7 @@ def sendGetRequest(url):
     except:
         print(response)
         return
+    
 rewards = {
     "die": -100,
     "food": 1,
@@ -74,6 +75,8 @@ class SlitherWorldEnv(gym.Env):
         self.render_mode = render_mode
         self.window = None
         self.clock = None
+        self.lastState = {}
+        self.firstState = True
 
     def _get_obs(self):
         return {"agent": self._agent_location, "target": self._target_location}
@@ -145,10 +148,51 @@ class SlitherWorldEnv(gym.Env):
         reqString = sendGetRequest(stepUrl)
         reqDict = json.loads(reqString)
         observation = self.createObs(reqDict)
-        reward = reqDict["mySnake"]["score"]
+        # create reward func
+        reward = self.reward(reqDict)
         terminated = reqDict["dieBool"]
         info = {}
+        self.storeLastState(reqDict)
+        firstState = False
         return observation, reward, terminated, False, info
+
+    def storeLastState(self, req):
+        self.lastState = req
+
+    def reward(self, req):
+        reward = 0
+        terminated = req['dieBool']
+
+        step_count = req['stepCount']
+        adjusted_score = req['mySnake']['score']/step_count
+
+        mySnake_x = req['mySnake']['x']
+        mySnake_y = req['mySnake']['y']
+
+        if not self.firstState:
+            last_x = self.lastState['mySnake']['x']
+            last_y = self.lastState['mySnake']['y']
+        else:
+            last_x = mySnake_x
+            last_y = mySnake_y
+
+        mySnake_size = req['mySnake']['size']
+        last_size = req['mySnake']['size']
+
+        size_diff = mySnake_size-last_size
+
+        x_diff = mySnake_x-last_x
+        y_diff = mySnake_y-last_y
+
+        if terminated:
+            reward -= rewards['die']
+            return reward
+        if size_diff > 0:
+            reward += rewards['growth']
+        reward += rewards['survives']
+        reward += adjusted_score
+
+        return reward
 
     def render(self):
         if self.render_mode == "rgb_array":
