@@ -30,7 +30,7 @@ model = PPO(
     ent_coef = 0.01,
     verbose=1)
 # Train the agent
-model.learn(total_timesteps=int(10))
+model.learn(total_timesteps=int(2e5))
 
 model_name = "ppo-snake-v2"
 model.save(model_name)

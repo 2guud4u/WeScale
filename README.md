@@ -16,3 +16,5 @@ To run the game local use run:
     cd /slither.io
     python -m http.server 8000
 ```
+run learning
+cd WeScale/GameEnv/run_slither.py
