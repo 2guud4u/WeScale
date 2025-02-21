@@ -42,7 +42,20 @@ function getFoodWithinRadius(snake, foodList, amount, radius) {
     }
     return foodWithinRadius.slice(0, amount);
 }
-
+function getBodyWithinRadius(snake,otherSnakesList, amount, radius) {
+    let bodyWithinRadius = [];
+    for (let i = 0; i < otherSnakesList.length; i++) {
+        let otherSnake = otherSnakesList[i];
+        let distance = Math.sqrt(
+            Math.pow(snake["body"][0]["x"] - otherSnake["body"][0]["x"], 2) +
+            Math.pow(snake["body"][0]["y"] - otherSnake["body"][0]["y"], 2)
+        );
+        if (distance < radius) {
+            bodyWithinRadius.push(otherSnake);
+        }
+    }
+    return bodyWithinRadius.slice(0, amount);
+}
 
 function PreProcessGameState(game) {
     let snakesData = game.mySnake.map((snake) => ({
@@ -51,7 +64,17 @@ function PreProcessGameState(game) {
         score: snake.score,
         name: snake.name,
     }));
-    let foodData = getFoodWithinRadius(snakesData[0],game.FOOD, 200, 500).map((food) => ({
+    let mySnake = snakesData[0];
+    snakesData = snakesData.slice(1);
+    
+    snakesData = getBodyWithinRadius(mySnake,snakesData, 200, 500).map((snake) => ({
+        body: snake.body,
+        size: snake.size,
+        score: snake.score,
+        name: snake.name,
+    }));
+
+    let foodData = getFoodWithinRadius(mySnake,game.FOOD, 200, 500).map((food) => ({
         foodLoc: [food.x, food.y],
         size: food.size,
     }));
@@ -59,8 +82,8 @@ function PreProcessGameState(game) {
     
     return {
         foodList: foodData,
-        otherSnakesList: snakesData.slice(1),
-        mySnake: snakesData[0],
+        otherSnakesList: snakesData,
+        mySnake: mySnake,
         dieBool: dieData,
     };
 }

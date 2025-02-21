@@ -9,7 +9,8 @@ baseUrl = "http://localhost:3000"  # Change port if needed
 
 FOOD_AMOUNT = 200
 BODY_AMOUNT = 100
-
+OTHER_SNAKES_AMOUNT = 10
+BODY_SHAPE = 3
 def sendGetRequest(url):
     try:
         response = requests.get(url)
@@ -54,6 +55,9 @@ class SlitherWorldEnv(gym.Env):
             # 'otherSnakes': spaces.Sequence(
             #     snake_dict_space
             # ),
+            # "otherBodies": spaces.Box(low=-10000, high=10000, shape=(BODY_AMOUNT*2,), dtype=np.float32),
+            # "otherHeads": spaces.Box(low=-10000, high=10000, shape=(OTHER_SNAKES_AMOUNT*BODY_SHAPE*BODY_AMOUNT,), dtype=np.float32),
+            "otherSnakesList": spaces.Box(low=-10000, high=10000, shape=(OTHER_SNAKES_AMOUNT*BODY_SHAPE*BODY_AMOUNT,), dtype=np.float32),
             'mySnake': spaces.Box(low=-10000, high=10000, shape=(2,), dtype=np.float32),
             'mySnakeBody': spaces.Box(low=-10000, high=10000, shape=(BODY_AMOUNT*2,), dtype=np.float32),
             'foodList': spaces.Box(low=-10000, high=10000, shape=(FOOD_AMOUNT*3,), dtype=np.float32)
@@ -89,13 +93,27 @@ class SlitherWorldEnv(gym.Env):
             obs["mySnakeBody"] = obs["mySnakeBody"][:BODY_AMOUNT*2]
 
         obs["mySnake"] = np.array([data["mySnake"]["size"], data["mySnake"]["score"]], dtype=np.float32)
-        # obs["otherSnakes"] = tuple([{
-        #     "size": int(snake["size"]),
-        #     "score": int(snake["score"]),
-        #     "name": snake["name"],
-        #     "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in snake["body"]])
-        #     } for snake in data["otherSnakesList"]])
         
+        otherSnakes = []
+        for snake in data["otherSnakesList"][:OTHER_SNAKES_AMOUNT]:
+            thisSnake = []
+            thisSnake=np.array([np.array([loc['x'], loc['y'], snake["size"]], dtype=np.float32) for loc in snake["body"]])
+            ###padding
+            if len(thisSnake) < BODY_SHAPE*BODY_AMOUNT:
+                thisSnake = np.pad(thisSnake, ((0, BODY_SHAPE*BODY_AMOUNT-len(thisSnake)), (0, 0)), 'constant')
+            elif len(thisSnake) > BODY_SHAPE*BODY_AMOUNT:
+                thisSnake = thisSnake[:BODY_SHAPE*BODY_AMOUNT]
+            otherSnakes.append(thisSnake)
+            
+        
+        
+        obs["otherSnakesList"] = np.array(otherSnakes, dtype=np.float32).flatten()
+        #padding
+        if len(obs["otherSnakesList"]) < OTHER_SNAKES_AMOUNT*BODY_SHAPE*BODY_AMOUNT:
+            obs["otherSnakesList"] = np.pad(obs["otherSnakesList"], (0, OTHER_SNAKES_AMOUNT*BODY_SHAPE*BODY_AMOUNT-len(obs["otherSnakesList"])), 'constant')
+        elif len(obs["otherSnakesList"]) > OTHER_SNAKES_AMOUNT*BODY_SHAPE*BODY_AMOUNT:
+            obs["otherSnakesList"] = obs["otherSnakesList"][:OTHER_SNAKES_AMOUNT*BODY_SHAPE*BODY_AMOUNT]
+
         foods = [[food["foodLoc"][0], food["foodLoc"][1], food["size"]] for food in data["foodList"][:FOOD_AMOUNT*3]]
         obs["foodList"] = np.array(foods, dtype=np.float32).flatten()
         #padding
