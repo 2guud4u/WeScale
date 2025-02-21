@@ -45,18 +45,22 @@ function PreProcessGameState(game) {
         size: snake.size,
         score: snake.score,
         name: snake.name,
+        x: snake.x,
+        y: snake.y
     }));
     let foodData = game.FOOD.map((food) => ({
         foodLoc: [food.x, food.y],
         size: food.size,
     }));
     let dieData = game.die;
+    let stepCount = game.stepCount;
     
     return {
         foodList: foodData,
         otherSnakesList: snakesData.slice(1),
         mySnake: snakesData[0],
         dieBool: dieData,
+        stepCount: stepCount
     };
 }
 // app.get("/reset", (req, res) => {
