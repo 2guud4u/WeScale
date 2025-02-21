@@ -37,10 +37,8 @@ snake_dict_space = spaces.Dict({
     'score': spaces.Discrete(1000000),
     'name': spaces.Text(max_length=100)
 })
-food_dict_space = spaces.Dict({
-    "foodLoc": spaces.Box(low=-10000, high=10000, shape=(2,), dtype=np.float32),
-    "size": spaces.Discrete(1000)
-})
+food_dict_space = spaces.Box(low=-10000, high=10000, shape=(3,1), dtype=np.float32)
+
 
 
 class SlitherWorldEnv(gym.Env):
@@ -49,18 +47,14 @@ class SlitherWorldEnv(gym.Env):
     def __init__(self, render_mode=None, size=5):
         self.size = size  # The size of the square grid
         self.window_size = 512  # The size of the PyGame window
-
-        # Observations are dictionaries with the agent's and the target's location.
-        # Each location is encoded as an element of {0, ..., `size`}^2,
-        # i.e. MultiDiscrete([size, size]).
         self.observation_space = spaces.Dict({
-            'mySnake': snake_dict_space,
-            'otherSnakes': spaces.Sequence(
-                snake_dict_space
-            ),
-            'foodList': spaces.Sequence(
-                food_dict_space
-            ),
+            # 'mySnake': snake_dict_space,
+            # 'otherSnakes': spaces.Sequence(
+            #     snake_dict_space
+            # ),
+            'mySnake': spaces.Box(low=-10000, high=10000, shape=(2,), dtype=np.float32),
+            'mySnakeBody': spaces.Box(low=-10000, high=10000, shape=(200,), dtype=np.float32),
+            'foodList': spaces.Box(low=-10000, high=10000, shape=(300,), dtype=np.float32)
           
             })
             
@@ -69,22 +63,8 @@ class SlitherWorldEnv(gym.Env):
         # We have 8 actions, corresponding to "right", "up", "left", "down", "up-right", "up-left", "down-right", "down-left"
         self.action_space = spaces.Box(low=np.array([-1000, -1000]), high=np.array([1000, 1000]), dtype=np.int32)
 
-        """
-        The following dictionary maps abstract actions from `self.action_space` to 
-        the direction we will walk in if that action is taken.
-        i.e. 0 corresponds to "right", 1 to "up" etc.
-        """
-
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
-
-        """
-        If human-rendering is used, `self.window` will be a reference
-        to the window that we draw to. `self.clock` will be a clock that is used
-        to ensure that the environment is rendered at the correct framerate in
-        human-mode. They will remain `None` until human-mode is used for the
-        first time.
-        """
         self.window = None
         self.clock = None
 
@@ -97,25 +77,31 @@ class SlitherWorldEnv(gym.Env):
         }
     def createObs(self,data):
         obs = dict()
-        obs["mySnake"] = dict()
-        obs["mySnake"] = {
-            "size": np.int64(data["mySnake"]["size"]),
-            "score": np.int64(data["mySnake"]["score"]),
-            "name": data["mySnake"]["name"],
-            "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in data["mySnake"]["body"]])
-            }
+        # obs["mySnake"] = dict()
+        # obs["mySnake"] = {
+        #     "size": np.int64(data["mySnake"]["size"]),
+        #     "score": np.int64(data["mySnake"]["score"]),
+        #     "name": data["mySnake"]["name"],
+        #     "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in data["mySnake"]["body"]])
+        #     }
+        mySnakeBody = [np.array([loc['x'], loc['y']], dtype=np.float32) for loc in data["mySnake"]["body"]]
+        obs["mySnakeBody"] = np.array(mySnakeBody, dtype=np.float32).flatten()
+        #padding
+        if len(obs["mySnakeBody"]) < 200:
+            obs["mySnakeBody"] = np.pad(obs["mySnakeBody"], (0, 200-len(obs["mySnakeBody"])), 'constant')
+        elif len(obs["mySnakeBody"]) > 200:
+            obs["mySnakeBody"] = obs["mySnakeBody"][:200]
+
+        obs["mySnake"] = np.array([data["mySnake"]["size"], data["mySnake"]["score"]], dtype=np.float32)
+        # obs["otherSnakes"] = tuple([{
+        #     "size": int(snake["size"]),
+        #     "score": int(snake["score"]),
+        #     "name": snake["name"],
+        #     "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in snake["body"]])
+        #     } for snake in data["otherSnakesList"]])
         
-        obs["otherSnakes"] = tuple([{
-            "size": int(snake["size"]),
-            "score": int(snake["score"]),
-            "name": snake["name"],
-            "body": tuple([np.array([loc['x'], loc['y']], dtype=np.float32) for loc in snake["body"]])
-            } for snake in data["otherSnakesList"]])
-        
-        obs["foodList"] = tuple([{
-            "foodLoc": np.array([food["foodLoc"][0], food["foodLoc"][1]], dtype=np.float32),
-             "size": np.int64(food["size"]),
-        } for food in data["foodList"][:5]])
+        foods = [[food["foodLoc"][0], food["foodLoc"][1], food["size"]] for food in data["foodList"][:100]]
+        obs["foodList"] = np.array(foods, dtype=np.float32).flatten()
 
         return obs
     

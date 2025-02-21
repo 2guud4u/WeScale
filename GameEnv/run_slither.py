@@ -8,8 +8,37 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from gymnasium import spaces
 import numpy as np
 from gymnasium.spaces.utils import flatten_space
-
+import pprint
+from gymnasium import envs
+from gymnasium.wrappers import FlattenObservation
+from stable_baselines3.common.monitor import Monitor
 env = gymnasium.make('gymnasium_env/slither_world')
+# env =make_vec_env('gymnasium_env/slither_world', n_envs=16)
+# wrapped_env = FlattenObservation(env)
+observation, info = env.reset()
+# wrapped_env = FlattenObservation(env)
+# print(wrapped_env.observation_space)
+
+model = PPO(
+    policy = 'MultiInputPolicy',
+    env = env,
+    n_steps = 1024,
+    batch_size = 64,
+    n_epochs = 4,
+    gamma = 0.999,
+    gae_lambda = 0.98,
+    ent_coef = 0.01,
+    verbose=1)
+# Train the agent
+model.learn(total_timesteps=int(10))
+
+model_name = "ppo-snake-v2"
+model.save(model_name)
+
+eval_env = Monitor(gymnasium.make("gymnasium_env/slither_world"))
+mean_reward, std_reward = evaluate_policy(model, eval_env, n_eval_episodes=10, deterministic=True)
+print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
+# env = make_vec_env('gymnasium_env/slither_world', n_envs=1)
 # class FlattenObservationWrapper(gymnasium.ObservationWrapper):
 #     def __init__(self, env):
 #         super().__init__(env)
@@ -24,21 +53,24 @@ env = gymnasium.make('gymnasium_env/slither_world')
 #         return flatten_space(observation)
 
 
-# env = FlattenObservationWrapper(env)
-observation, info = env.reset()
+# # env = FlattenObservationWrapper(env)
+# observation, info = env.reset()
 
 
-episode_over = False
-while not episode_over:
-    action = env.action_space.sample()  # agent policy that uses the observation and info
-    observation, reward, terminated, truncated, info = env.step(action)
+# episode_over = False
+# while not episode_over:
+#     action = env.action_space.sample()  # agent policy that uses the observation and info
+#     observation, reward, terminated, truncated, info = env.step(action)
 
-    episode_over = terminated or truncated
+#     episode_over = terminated or truncated
 
-# Create environment
+# # Create environment
 
-# Instantiate the agent
-model = PPO('MultiInputPolicy', env, verbose=1)
-# Train the agent
-model.learn(total_timesteps=int(2e5))
+# # Instantiate the agent
+# model = PPO('MultiInputPolicy', env, verbose=1)
+# # Train the agent
+# model.learn(total_timesteps=int(2e5))
+
+# obs, _ = env.reset()
+# print("First observation:", obs)
 
