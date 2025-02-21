@@ -63,6 +63,8 @@ function PreProcessGameState(game) {
         size: snake.size,
         score: snake.score,
         name: snake.name,
+        x: snake.x,
+        y: snake.y
     }));
     let mySnake = snakesData[0];
     snakesData = snakesData.slice(1);
@@ -79,12 +81,14 @@ function PreProcessGameState(game) {
         size: food.size,
     }));
     let dieData = game.die;
+    let stepCount = game.stepCount;
     
     return {
         foodList: foodData,
         otherSnakesList: snakesData,
         mySnake: mySnake,
         dieBool: dieData,
+        stepCount: stepCount
     };
 }
 // app.get("/reset", (req, res) => {
